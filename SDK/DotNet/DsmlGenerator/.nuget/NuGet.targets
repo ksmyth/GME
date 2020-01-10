@@ -117,6 +117,7 @@
                     OutputFilename = Path.GetFullPath(OutputFilename);
 
                     Log.LogMessage("Downloading latest version of NuGet.exe...");
+                    System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
                     WebClient webClient = new WebClient();
                     webClient.DownloadFile("https://nuget.org/nuget.exe", OutputFilename);
 
