@@ -24,6 +24,7 @@ WIX_LIGHT_PRG = "light.exe"
 WIX_LIGHT_ARG = "-sw1076 -sw1055 -sw1056 -sice:ICE43 -sice:ICE57 -ext WixUIExtension -ext WixUtilExtension -ext WiXNetFxExtension" # See comments in GME.wxs
 MSBUILD = r"C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 VCVARS = r"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
+_this_dir = os.path.dirname(os.path.abspath(__file__))
 
 #
 # Classes
@@ -191,15 +192,13 @@ def query_GUID(mta_file):
 
 
 def _get_wix_path():
-    import _winreg
-    wix_vers = ('3.11', '3.10')
-    for wix_ver in wix_vers:
-        try:
-            with _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Windows Installer XML\\' + wix_ver, 0, _winreg.KEY_READ | _winreg.KEY_WOW64_32KEY) as wixkey:
-                return _winreg.QueryValueEx(wixkey, 'InstallRoot')[0]
-        except Exception as e:
-            pass
-    raise ValueError('Could not find WiX {}'.format(' or '.join(wix_vers)))
+    wix_version = '3.11.1'
+    wix_dir = 'WiX.' + wix_version
+    if not os.path.isdir(os.path.join(_this_dir, 'nuget', wix_dir)):
+        subprocess.check_call([os.path.join(_this_dir, r'..\..\Tests\GPyUnit\DsmlGeneratorTest\.nuget\NuGet.exe')] +
+            'install -Source https://www.nuget.org/api/v2/ -OutputDirectory nuget -Version'.split() + [wix_version, 'WiX'], cwd=_this_dir)
+    return os.path.join(_this_dir, 'nuget', wix_dir, 'tools')
+
 
 def test_WiX():
     "Test for WiX. Raises exception if not found."
