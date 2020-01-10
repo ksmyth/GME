@@ -5,6 +5,7 @@
 #include "GuiMeta.h"
 #include "GuiObject.h"
 
+CComBSTR StringFromGUID2(const CComVariant& guid);
 
 // helper functions
 
@@ -65,6 +66,11 @@ CGuiMetaProject::CGuiMetaProject(CComPtr<IMgaMetaProject> &mgaPt)
 			CComBSTR bstr;
 			COMTHROW(mgaMeta->get_DisplayedName(&bstr));
 			CopyTo(bstr,displayedName);
+		}
+		{
+			CComVariant pguid;
+			COMTHROW(mgaMeta->get_GUID(&pguid));
+			guid = StringFromGUID2(pguid);
 		}
 
 		CComPtr<IMgaMetaFolder> mmFolder;

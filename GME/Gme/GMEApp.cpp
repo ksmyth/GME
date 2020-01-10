@@ -26,6 +26,7 @@
 #include "GMEOLEApp.h"
 #include "GMEEventLogger.h"
 #include "GMEPrintDialog.h"
+#include <sstream>
 
 #include "CrashRpt.h"
 #ifdef _DEBUG
@@ -124,8 +125,10 @@ BEGIN_MESSAGE_MAP(CGMEApp, CWinAppEx)
 	ON_COMMAND_EX_RANGE(ID_FILE_MRU_PRJ1, ID_FILE_MRU_PRJ16, OnOpenRecentProject)
 	ON_COMMAND_RANGE(ID_FILE_RUNPLUGIN1, ID_FILE_RUNPLUGIN_LAST, OnRunPlugin)
 	ON_COMMAND_RANGE(ID_FILE_INTERPRET1, ID_FILE_INTERPRET_LAST, OnRunInterpreter)
-	ON_UPDATE_COMMAND_UI_RANGE( ID_FILE_RUNPLUGIN1, ID_FILE_RUNPLUGIN_LAST, OnUpdateFilePluginX)
-	ON_UPDATE_COMMAND_UI_RANGE( ID_FILE_INTERPRET1, ID_FILE_INTERPRET_LAST, OnUpdateFileInterpretX)
+	ON_COMMAND_RANGE(ID_HELP_PARADIGMHELP_FIRST, ID_HELP_PARADIGMHELP_LAST, OnRunParadigmHelp)
+	ON_COMMAND_RANGE(ID_HELP_COMPONENTHELP_FIRST, ID_HELP_COMPONENTHELP_LAST, OnRunComponentHelp)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_RUNPLUGIN1, ID_FILE_RUNPLUGIN_LAST, OnUpdateFilePluginX)
+	ON_UPDATE_COMMAND_UI_RANGE(ID_FILE_INTERPRET1, ID_FILE_INTERPRET_LAST, OnUpdateFileInterpretX)
 	ON_COMMAND(ID_FOCUS_BROWSER, OnFocusBrowser)
 	ON_COMMAND(ID_FOCUS_INSPECTOR, OnFocusInspector)
 END_MESSAGE_MAP()
@@ -141,7 +144,7 @@ CGMEApp theApp;
 
 /*static*/ const TCHAR * CGMEApp::m_no_model_open_string = _T("_NO_MODEL_IS_OPEN_");
 
-static CComBSTR StringFromGUID2(const CComVariant& guid)
+CComBSTR StringFromGUID2(const CComVariant& guid)
 {
 	ASSERT(guid.vt == (VT_UI1 | VT_ARRAY));
 	GUID guid2;
@@ -1137,8 +1140,8 @@ void CGMEApp::UpdateComponentToolbar()
 
 void CGMEApp::UpdateComponentLists(bool restart_addons)
 {
-	ClearDisabledComps();	
-	plugins .RemoveAll();
+	ClearDisabledComps();
+	plugins.RemoveAll();
 	pluginTooltips.RemoveAll();
 	interpreters.RemoveAll();
 	interpreterTooltips.RemoveAll();
@@ -1182,6 +1185,48 @@ void CGMEApp::UpdateComponentLists(bool restart_addons)
 				}
 			}
 		}
+
+		this->addonOnlineHelp.RemoveAll(); this->addonOfflineHelp.RemoveAll();
+		this->pluginOnlineHelp.RemoveAll(); this->pluginOfflineHelp.RemoveAll();
+		this->interpreterOnlineHelp.RemoveAll(); this->interpreterOfflineHelp.RemoveAll();
+		for (INT i = 0; i < this->plugins.GetSize() + this->interpreters.GetSize() + this->addons.GetSize(); ++i) {
+			HRESULT errCode;
+			CString onlineHelp;
+			CString offlineHelp;
+			CComBSTR componentName =
+				(i < plugins.GetSize()
+					? plugins[i]
+					: (i < plugins.GetSize() + interpreters.GetSize()
+						? interpreters[i - plugins.GetSize()]
+						: addons[i - plugins.GetSize() - interpreters.GetSize()]));
+
+			errCode = reg->get_ComponentExtraInfo(REGACCESS_PRIORITY, componentName, CComBSTR(L"OnlineHelp"), PutOut(onlineHelp));
+			if (errCode != S_OK || onlineHelp.IsEmpty())
+			{
+				onlineHelp = L"";
+			}
+			errCode = reg->get_ComponentExtraInfo(REGACCESS_PRIORITY, componentName, CComBSTR(L"OfflineHelp"), PutOut(offlineHelp));
+			if (errCode != S_OK || offlineHelp.IsEmpty())
+			{
+				offlineHelp = L"";
+			}
+			if (i < this->plugins.GetSize())
+			{
+				this->pluginOnlineHelp.Add(onlineHelp);
+				this->pluginOfflineHelp.Add(offlineHelp);
+			}
+			else if (i < this->plugins.GetSize() + this->interpreters.GetSize())
+			{
+				this->interpreterOnlineHelp.Add(onlineHelp);
+				this->interpreterOfflineHelp.Add(offlineHelp);
+			}
+			else
+			{
+				this->addonOnlineHelp.Add(onlineHelp);
+				this->addonOfflineHelp.Add(offlineHelp);
+			}
+		}
+
 		// access constraint mgr
 		FindConstraintManager();
 
@@ -1194,6 +1239,8 @@ void CGMEApp::UpdateDynMenus(CMenu *toolmenu)
 {
 	CString runPluginLabel = _T("R&un Plug-In");
 	CString runInterpreterLabel = _T("Run In&terpreter");
+	CString helpParadigmLabel = _T("&Paradigm Help");
+	CString helpComponentLabel = _T("C&omponent Help");
 	CString label;
 	// [ Begin workaround
 	// If you just go left to the Window menu next to the Tools menu, and back to the Tools menu (so not even abandoming the menubar)
@@ -1222,7 +1269,7 @@ void CGMEApp::UpdateDynMenus(CMenu *toolmenu)
 		for(UINT idx = 0; idx < toolmenu->GetMenuItemCount(); idx++) {
 			toolmenu->GetMenuString(idx, label, MF_BYPOSITION);
 			UINT menuID = toolmenu->GetMenuItemID(idx);
-			if (menuID == ID_TOOLS_RUNPLUG || menuID == ID_FILE_RUNINTERPRETER) {
+			if (menuID == ID_TOOLS_RUNPLUG || menuID == ID_FILE_RUNINTERPRETER || menuID == ID_HELP_COMPONENTHELP || menuID == ID_HELP_PARADIGMHELP) {
 				dynmenus_need_refresh = true;
 				break;
 			}
@@ -1243,28 +1290,31 @@ void CGMEApp::UpdateDynMenus(CMenu *toolmenu)
 				toolmenu->DeleteMenu(idx, MF_BYPOSITION);
 				if (plugins.GetSize() == 1) {
 					toolmenu->InsertMenu(idx, MF_BYPOSITION | MF_ENABLED,
-										ID_FILE_RUNPLUGIN1, pluginTooltips[0]);
-				} else {
+						ID_FILE_RUNPLUGIN1, pluginTooltips[0]);
+				}
+				else {
 					CMenu pluginmenu;
 					pluginmenu.CreatePopupMenu();
 					for(int i = 0; i < min(plugins.GetSize(), ID_FILE_RUNPLUGIN_LAST - ID_FILE_RUNPLUGIN1); ++i) {
 						pluginmenu.AppendMenu(MF_ENABLED, ID_FILE_RUNPLUGIN1 + i, pluginTooltips[i]);
 					}
 					toolmenu->InsertMenu(idx,
-								plugins.GetSize() ? MF_BYPOSITION | MF_POPUP | MF_ENABLED : MF_BYPOSITION | MF_POPUP | MF_GRAYED,
-								(UINT_PTR)pluginmenu.Detach(), runPluginLabel);
+						plugins.GetSize() ? MF_BYPOSITION | MF_POPUP | MF_ENABLED : MF_BYPOSITION | MF_POPUP | MF_GRAYED,
+						(UINT_PTR)pluginmenu.Detach(), runPluginLabel);
 				}
 				found = true;
 			}
-		} else if (!label.CompareNoCase(runInterpreterLabel) ||
-					menuID == ID_FILE_RUNINTERPRETER || menuID == ID_FILE_INTERPRET1)
+		}
+		else if (!label.CompareNoCase(runInterpreterLabel) ||
+			menuID == ID_FILE_RUNINTERPRETER || menuID == ID_FILE_INTERPRET1)
 		{
 			if (dynmenus_need_refresh) {
 				toolmenu->DeleteMenu(idx, MF_BYPOSITION);
 				if (interpreters.GetSize() == 1) {
 					toolmenu->InsertMenu(idx, MF_BYPOSITION | MF_ENABLED,
-										ID_FILE_INTERPRET1, interpreterTooltips[0]);
-				} else {
+						ID_FILE_INTERPRET1, interpreterTooltips[0]);
+				}
+				else {
 					CMenu pluginmenu;
 					pluginmenu.CreatePopupMenu();
 
@@ -1287,9 +1337,91 @@ void CGMEApp::UpdateDynMenus(CMenu *toolmenu)
 						pluginmenu.AppendMenu(MF_ENABLED, tt.id, tt.tooltip);
 					});
 					toolmenu->InsertMenu(idx,
-								interpreters.GetSize() ? MF_BYPOSITION | MF_POPUP | MF_ENABLED : MF_BYPOSITION | MF_POPUP | MF_GRAYED,
-								(UINT_PTR)pluginmenu.Detach(), runInterpreterLabel);
+						interpreters.GetSize() ? MF_BYPOSITION | MF_POPUP | MF_ENABLED : MF_BYPOSITION | MF_POPUP | MF_GRAYED,
+						(UINT_PTR)pluginmenu.Detach(), runInterpreterLabel);
 				}
+				found = true;
+			}
+		}
+		else if (!label.CompareNoCase(helpComponentLabel) ||
+			menuID == ID_HELP_COMPONENTHELP || menuID == ID_HELP_COMPONENTHELP_FIRST)
+		{
+			if (dynmenus_need_refresh) {
+				toolmenu->DeleteMenu(idx, MF_BYPOSITION);
+				CMenu helpComponent;
+				helpComponent.CreatePopupMenu();
+				for (int i = 0; i < min(plugins.GetSize() + interpreters.GetSize() + addons.GetSize(), ID_HELP_COMPONENTHELP_LAST - ID_HELP_COMPONENTHELP_FIRST);) {
+					int index = i / 2;
+					CString componentName = (index < plugins.GetSize() ? 
+						pluginTooltips[index] : (index < plugins.GetSize() + interpreters.GetSize() ?
+						interpreterTooltips[index - plugins.GetSize()] : addons[index - plugins.GetSize() - interpreters.GetSize()]));
+					CString onlineHelpLocation = (index < plugins.GetSize() ? 
+							pluginOnlineHelp[index] : (index < plugins.GetSize() + interpreters.GetSize() ? 
+								interpreterOnlineHelp[index - plugins.GetSize()] : addonOnlineHelp[index - plugins.GetSize() - interpreters.GetSize()]));
+					CString offlineHelpLocation = (index < plugins.GetSize() ? 
+							pluginOfflineHelp[index] : (index < plugins.GetSize() + interpreters.GetSize() ? 
+								interpreterOfflineHelp[index - plugins.GetSize()] : addonOfflineHelp[index - plugins.GetSize() - interpreters.GetSize()]));
+
+					CMenu help;
+					help.CreatePopupMenu();
+					if (!onlineHelpLocation.IsEmpty())
+					{
+						help.AppendMenu(MF_ENABLED, ID_HELP_COMPONENTHELP_FIRST + i++, L"Online Help");
+					}
+					else 
+					{ 
+						++i; 
+					}
+
+					if (!offlineHelpLocation.IsEmpty())
+					{
+						help.AppendMenu(MF_ENABLED, ID_HELP_COMPONENTHELP_FIRST + i++, L"Offline Help");
+					}
+					else 
+					{ 
+						++i; 
+					}
+
+					if (help.GetMenuItemCount() != 0)
+					{
+						helpComponent.InsertMenu(index, MF_BYPOSITION | MF_POPUP | MF_ENABLED, (UINT_PTR)help.Detach(), componentName);
+					}
+				}
+				toolmenu->InsertMenu(idx, 
+					helpComponent.GetMenuItemCount() ? MF_BYPOSITION | MF_POPUP | MF_ENABLED : MF_BYPOSITION | MF_POPUP | MF_GRAYED, 
+					(UINT_PTR)helpComponent.Detach(), helpComponentLabel);
+				found = true;
+			}
+		}
+		else if (!label.CompareNoCase(helpParadigmLabel) ||
+			menuID == ID_HELP_PARADIGMHELP || menuID == ID_HELP_PARADIGMHELP_FIRST)
+		{
+			if (dynmenus_need_refresh && mgaProject) {
+				toolmenu->DeleteMenu(idx, MF_BYPOSITION);
+				CComBSTR pname = guiMetaProject->name;
+				CComBSTR pguidstr = guiMetaProject->guid;
+
+				CMenu help;
+				help.CreatePopupMenu();
+				CComPtr<IMgaRegistrar2> reg;
+				HRESULT hr = reg.CoCreateInstance(CComBSTR(L"Mga.MgaRegistrar"));
+				if (SUCCEEDED(hr))
+				{
+					reg->GetParadigmExtraInfoDisp(pname, pguidstr, CComBSTR(L"OnlineHelp"), PutOut(this->paradigmOnlineHelp));
+					reg->GetParadigmExtraInfoDisp(pname, pguidstr, CComBSTR(L"OfflineHelp"), PutOut(this->paradigmOfflineHelp));
+				}
+
+				if (!this->paradigmOnlineHelp.IsEmpty())
+				{
+					help.AppendMenu(MF_ENABLED, ID_HELP_PARADIGMHELP_FIRST, L"Online Help");
+				}
+				if (!this->paradigmOfflineHelp.IsEmpty())
+				{
+					help.AppendMenu(MF_ENABLED, ID_HELP_PARADIGMHELP_LAST, L"Offline Help");
+				}
+				toolmenu->InsertMenu(idx, 
+					help.GetMenuItemCount() != 0 ? MF_BYPOSITION | MF_POPUP | MF_ENABLED : MF_BYPOSITION | MF_POPUP | MF_GRAYED, 
+					(UINT_PTR)help.Detach(), pname);
 				found = true;
 			}
 		}
@@ -1297,7 +1429,6 @@ void CGMEApp::UpdateDynMenus(CMenu *toolmenu)
 	if (found)
 		dynmenus_need_refresh = false;
 }
-
 
 // throws exceptions!!
 void CGMEApp::AfterOpenOrCreateProject(const CString &conn)
@@ -2972,7 +3103,38 @@ void CGMEApp::OnRunInterpreter(UINT nID) {
 	RunComponent(interpreters[nID - ID_FILE_INTERPRET1]);
 }
 
+void CGMEApp::OnRunComponentHelp(UINT nID) {
+	UINT id = (nID - ID_HELP_COMPONENTHELP_FIRST) / 2;
+	bool isEven = (nID - ID_HELP_COMPONENTHELP_FIRST) % 2 == 0;
+	CGMEEventLogger::LogGMEEvent(_T("CGMEApp::OnRunComponentHelp ") +
+		(id < plugins.GetSize() ?
+			plugins[id] : (id < plugins.GetSize() + interpreters.GetSize() ?
+				interpreters[id - plugins.GetSize()] : addons[id - plugins.GetSize() - interpreters.GetSize()])) + 
+		_T("\r\n"));
 
+	CString onlineHelpLocation = (id < plugins.GetSize() ? 
+			pluginOnlineHelp[id] : (id < plugins.GetSize() + interpreters.GetSize() ? 
+				interpreterOnlineHelp[id - plugins.GetSize()] : addonOnlineHelp[id - plugins.GetSize() - interpreters.GetSize()]));
+	CString offlineHelpLocation = (id < plugins.GetSize() ? 
+			pluginOfflineHelp[id] : (id < plugins.GetSize() + interpreters.GetSize() ? 
+				interpreterOfflineHelp[id - plugins.GetSize()] : addonOfflineHelp[id - plugins.GetSize() - interpreters.GetSize()]));
+
+	ShellExecute(NULL, L"open", (isEven ? onlineHelpLocation : offlineHelpLocation), NULL, NULL, SW_SHOWNORMAL);
+}
+
+void CGMEApp::OnRunParadigmHelp(UINT nID)
+{
+	CComBSTR pname = guiMetaProject->name;
+
+	CGMEEventLogger::LogGMEEvent((_T("CGMEApp::OnRunParadigmHelp ") +
+		std::wstring(static_cast<const wchar_t*>(pname)) + _T("\r\n")).c_str());
+  
+	CString help = (nID == ID_HELP_PARADIGMHELP_FIRST ? this->paradigmOnlineHelp : this->paradigmOfflineHelp);
+	if (!help.IsEmpty())
+	{
+		ShellExecute(NULL, L"open", help, NULL, NULL, SW_SHOWNORMAL);
+	}
+}
 
 void CGMEApp::RunComponent(const CString &compname)
 {

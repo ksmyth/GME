@@ -94,6 +94,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWndEx)
 	ON_UPDATE_COMMAND_UI(ID_MULTIUSER_ACTIVEUSERS, OnUpdateViewMultiUserActiveUsers)
 	ON_COMMAND(ID_VIEW_CLEARCONSOLE, OnViewClearConsole)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CLEARCONSOLE, OnUpdateViewClearConsole)
+	ON_UPDATE_COMMAND_UI(ID_HELP_CONTENTS, OnUpdateFileSettings)
 
 #define MSG_MAP_VIEW_PANE(ID, class_, member) \
 	ON_COMMAND(ID, (&CMainFrame::OnViewPane<class_, &CMainFrame::member>)) \
@@ -457,7 +458,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	mdiTabParams.m_tabLocation = CMFCTabCtrl::LOCATION_TOP;	// Specifies that the tabs labels are located at the top of the page
 	EnableMDITabbedGroups(TRUE, mdiTabParams);
 
-	CMFCToolBar::EnableQuickCustomization();
+ 	CMFCToolBar::EnableQuickCustomization();
 
 	// Set the visual manager and style based on persisted value
 	OnApplicationLook(theApp.m_nAppLook);
@@ -1266,6 +1267,13 @@ void CMainFrame::OnViewClearConsole()
 void CMainFrame::OnUpdateViewClearConsole(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable();
+}
+
+void CMainFrame::OnUpdateFileSettings(CCmdUI* pCmdUI)
+{
+	// This is an update message for Tools/Options menu
+	// This triggers the refresh of plugins/interpreters menus
+	theApp.UpdateDynMenus(pCmdUI->m_pMenu);
 }
 
 void CMainFrame::OnDropFiles(HDROP p_hDropInfo)

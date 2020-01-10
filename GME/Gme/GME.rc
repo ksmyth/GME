@@ -1,21 +1,17 @@
 // Microsoft Visual C++ generated resource script.
 //
-#include "resource.h"
-
+#include "resource.h"
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-#include "GMEVersion.h"
-
+#include "GMEVersion.h"
 /////////////////////////////////////////////////////////////////////////////
-#undef APSTUDIO_READONLY_SYMBOLS
-
+#undef APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
-
+// English (United States) resources
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
@@ -255,6 +251,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "&Paradigm Help",              ID_HELP_PARADIGMHELP
+        MENUITEM "C&omponent Help",             ID_HELP_COMPONENTHELP
         MENUITEM "&Contents",                   ID_HELP_CONTENTS
         MENUITEM "&About GME...",               ID_APP_ABOUT
     END
@@ -396,6 +394,8 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "&Paradigm Help",              ID_HELP_PARADIGMHELP
+        MENUITEM "C&omponent Help",             ID_HELP_COMPONENTHELP
         MENUITEM "&Contents",                   ID_HELP_CONTENTS
         MENUITEM "&Help",                       ID_HELP_HELP
         MENUITEM "&About GME...",               ID_APP_ABOUT
@@ -1789,4 +1789,3 @@ LANGUAGE 9, 1
 1 TYPELIB "GmeLib.tlb"
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
-

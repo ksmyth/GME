@@ -50,7 +50,10 @@ public:
 	CComPtr<IMgaMetaProject> mgaMetaProject;
 //  dynamic menus
 	CStringArray plugins, interpreters, addons;
-    CStringArray pluginTooltips, interpreterTooltips, addonToolTips;
+	CStringArray pluginTooltips, interpreterTooltips, addonToolTips;
+	CStringArray pluginOnlineHelp, interpreterOnlineHelp, addonOnlineHelp;
+	CStringArray pluginOfflineHelp, interpreterOfflineHelp, addonOfflineHelp;
+	CString paradigmOnlineHelp, paradigmOfflineHelp;
 	bool dynmenus_need_refresh;
 
 	// Application look
@@ -233,6 +236,8 @@ public:
 	afx_msg void OnFileXMLUpdate();
 	afx_msg void OnRunPlugin(UINT nID);
 	afx_msg void OnRunInterpreter(UINT nID);
+	afx_msg void OnRunComponentHelp(UINT nID);
+	afx_msg void OnRunParadigmHelp(UINT nID);
 	afx_msg void OnUpdateFilePluginX(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateFileInterpretX(CCmdUI* pCmdUI);
 	afx_msg void OnFileDisplayConstraints();
