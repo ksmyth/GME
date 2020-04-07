@@ -439,6 +439,7 @@ Install/Windows8.1-KB2999226-x64.msu
 Install/vc_redist.x64.v14.0.24123.exe
 Install/vc_redist.x64.v9.0.30729.4148.exe
 Install/vc_redist.x86.v14.0.24123.exe
+Install/build/nuget/
 Tests/GPyUnit/GME_310/DerivedRefport_test.mga
 /redist/
 /GME-*.*.*_src/
