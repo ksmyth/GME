@@ -64,7 +64,6 @@ static char THIS_FILE[] = __FILE__;
 #include <atlsafe.h>
 #include "mga_i.c"
 #include "meta_i.c"
-#include "Splash.h"
 
 CComModule _Module;
 
@@ -322,7 +321,6 @@ BOOL CGMEApp::InitInstance()
 		;
 	cmdInfo.m_bShowSplash = false;
 
-	CSplashWnd::EnableSplashScreen(cmdInfo.m_bShowSplash);
 	// CG: The following block was inserted by 'Status Bar' component.
 	{
 		//Set up date and time defaults so they're the same as system defaults
@@ -479,9 +477,6 @@ BOOL CGMEApp::InitInstance()
 
 BOOL CGMEApp::PreTranslateMessage(MSG* pMsg)
 {
-	// CG: The following lines were added by the Splash Screen component.
-	if (CSplashWnd::PreTranslateAppMessage(pMsg))
-		return TRUE;
 	// KMS: m_pMainWnd->PreTranslateMessage here for Alt-F,C. Otherwise, CGMEView::PreTranslateMessage TranslateAccelerator will return TRUE
 	if (m_pMainWnd && m_pMainWnd->PreTranslateMessage(pMsg))
 		return TRUE;

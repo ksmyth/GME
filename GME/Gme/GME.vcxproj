@@ -359,7 +359,6 @@ xcopy /Y/D/F ..\Lib\CrashRpt\bin\x64\crashrpt_lang.ini "$(OutDir)"
     <ClCompile Include="RecentConnStrList.cpp" />
     <ClCompile Include="ScrollZoomView.cpp" />
     <ClCompile Include="search.cpp" />
-    <ClCompile Include="Splash.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -421,7 +420,6 @@ xcopy /Y/D/F ..\Lib\CrashRpt\bin\x64\crashrpt_lang.ini "$(OutDir)"
     <None Include="res\SetDefault.bmp" />
     <None Include="res\setport.bmp" />
     <None Include="res\XME.ico" />
-    <None Include="Splsh16.bmp" />
     <None Include="res\Toolbar.bmp" />
     <None Include="res\toolbar1.bmp" />
     <None Include="res\ToolbarComponents.bmp" />
@@ -526,7 +524,6 @@ xcopy /Y/D/F ..\Lib\CrashRpt\bin\x64\crashrpt_lang.ini "$(OutDir)"
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScrollZoomView.h" />
     <ClInclude Include="search.h" />
-    <ClInclude Include="Splash.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="SVNClient.h" />
     <ClInclude Include="SVNDialogCommit.h" />

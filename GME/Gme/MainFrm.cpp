@@ -8,7 +8,6 @@
 #include "MainFrm.h"
 #include "GMEDoc.h"
 #include "GMEChildFrame.h"
-#include "Splash.h"
 #include "GMEEventLogger.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -615,10 +614,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// thus we ignore the registry settings
 	m_wndComponentBar.ShowWindow(SW_HIDE);
 	ShowPane(&m_wndComponentBar, FALSE, FALSE, FALSE);
-
-
-	// CG: The following line was added by the Splash Screen component.
-	CSplashWnd::ShowSplashScreen(this);
 
 	// Adding full screen functionality
 	EnableFullScreenMode(ID_VIEW_FULLSCREEN);

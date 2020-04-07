@@ -210,9 +210,6 @@
     <ClCompile Include="search.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Splash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -330,9 +327,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\setport.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Splsh16.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\Toolbar.bmp">
@@ -594,9 +588,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="search.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Splash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StdAfx.h">
