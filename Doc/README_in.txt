@@ -25,6 +25,14 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
+Release Notes of Release 20.2.12
+----------------------------------
+  - Binary compatibility with 11.12.2
+  - Fix model editor right-click>Annotations crash
+  - XME serialization: sort by GUID for containment, role for connections
+  - Fix bug where right side of model editor wasn't rendered after increasing screen resolution
+  - Java interpreter: don't crash when trying to run Java 10 .class with Java 8
+
 Release Notes of Release 18.10.22
 ----------------------------------
   - Binary compatibility with 11.12.2
