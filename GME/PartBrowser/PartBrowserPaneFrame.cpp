@@ -129,9 +129,11 @@ BOOL CPartBrowserPaneFrame::OnInitDialog()
 	RECT r;
 	GetClientRect(&r);
 	BOOL success = pane.Create(NULL, _T("PartsPane"), WS_CHILD | WS_VISIBLE | WS_BORDER, r, this, IDD_PARTBROWSER_PANE);
-	pane.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+	if (success) {
+		pane.ModifyStyleEx(0, WS_EX_CLIENTEDGE);
+	}
 
-	return TRUE;	// return TRUE unless you set the focus to a control
+	return success;	// return TRUE unless you set the focus to a control
 					// EXCEPTION: OCX Property Pages should return FALSE
 }
 

@@ -380,7 +380,6 @@ CComBSTR truncateName( IUnknown *p_bs, CComBSTR pIn)
 	}
 	if( nmspc && nmspc.Length() > 0) // some namespace is set
 	{
-		bool nm_match = false;
 		COMTHROW(nmspc.Append( L"::"));
 		unsigned int nms_len = nmspc.Length();
 		unsigned int pin_len = pIn.Length();

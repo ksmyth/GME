@@ -147,8 +147,6 @@ void BinObject::UpgradeRegistryIfNecessary(CCoreBinFile* p_bf)
 
 void BinObject::HasGuidAndStatAttributes(GUID& t_guid, bool* p_statusFound, bool* p_oldRegFound)
 {
-	int a1( 0), a2( 0), a3( 0), a4( 0);
-
 	binattrs_iterator i = binattrs.begin();
 	binattrs_iterator e = binattrs.end();
 	while( i != e)

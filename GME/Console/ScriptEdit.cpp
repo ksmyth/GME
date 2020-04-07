@@ -241,7 +241,6 @@ void CScriptEdit::ExecuteScript( CString& p_str)
 		_bstr_t eng;
 		COMTHROW(registrar->get_ScriptEngine(REGACCESS_USER, eng.GetAddress()));
 		_bstr_t engine(L"JScript");
-		int len = eng.length();
 		if (eng.length() != 0)
 			engine = eng;
 
