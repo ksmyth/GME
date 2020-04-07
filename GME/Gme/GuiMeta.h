@@ -15,6 +15,7 @@ public:
 	~CGuiMetaProject();
 public:
 	CString name;
+	CString guid;
 	CString displayedName;
 	CGuiMetaFolder *rootFolder;
 	CGuiMetaBaseTable metaTable;

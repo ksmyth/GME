@@ -511,6 +511,7 @@
                   <ProgId Id="Mga.MgaRegistrar" Description="MgaRegistrar Class" />
                 </ProgId>
                 <Interface Id="{F1D6BB05-42EE-11D4-B3F4-005004D38590}" Name="IMgaRegistrar"  ProxyStubClassId="{00020424-0000-0000-C000-000000000046}" ProxyStubClassId32="{00020424-0000-0000-C000-000000000046}" />
+                <Interface Id="{0E3C2752-6173-4050-BD47-AE54DA1C373A}" Name="IMgaRegistrar2"  ProxyStubClassId="{00020424-0000-0000-C000-000000000046}" ProxyStubClassId32="{00020424-0000-0000-C000-000000000046}" />
               </Class>
               <Class Id="{D03EC327-447B-11D4-B3F6-005004D38590}" Context="InprocServer32" Description="MgaLauncher Class" ThreadingModel="apartment" Programmable="yes">
                 <ProgId Id="Mga.MgaLauncher.1" Description="MgaLauncher Class">

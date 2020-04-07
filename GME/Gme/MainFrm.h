@@ -165,6 +165,7 @@ protected:
 	afx_msg void OnUpdateViewMultiUserSubversion(CCmdUI* pCmdUI);
 	afx_msg void OnViewClearConsole();
 	afx_msg void OnUpdateViewClearConsole( CCmdUI* pCmdUI);
+	afx_msg void OnUpdateFileSettings(CCmdUI* pCmdUI);
 
 	template<class paneclass, typename paneclass CMainFrame::* const m_pane> afx_msg void OnViewPane() 
 	{

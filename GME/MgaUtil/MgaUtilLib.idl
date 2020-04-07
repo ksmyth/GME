@@ -38,7 +38,8 @@ library MGAUtilLib
 	]
 	coclass MgaRegistrar
 	{
-		[default] interface IMgaRegistrar;
+		[default] interface IMgaRegistrar2;
+		interface IMgaRegistrar;
 		interface IGMEVersionInfo;
 	};
 

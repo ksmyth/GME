@@ -2423,7 +2423,7 @@ STDMETHODIMP CMgaRegistrar::UnregisterComponentLibrary(BSTR path, regaccessmode_
 		{
 			--index;
 			CComObjPtr<ITypeInfo> typeinfo;
-			COMTHROW( typelib->GetTypeInfo(index, PutOut(typeinfo)) );// index parameter with the range of 0 to GetTypeInfoCount() –1.
+			COMTHROW( typelib->GetTypeInfo(index, PutOut(typeinfo)) );// index parameter with the range of 0 to GetTypeInfoCount() Â–1.
 
 			TYPEATTR *typeattr = NULL;
 			COMTHROW( typeinfo->GetTypeAttr(&typeattr) );
@@ -2451,6 +2451,94 @@ STDMETHODIMP CMgaRegistrar::UnregisterComponentLibrary(BSTR path, regaccessmode_
 		}
 
 		// TODO: unregister the type library
+	}
+	COMCATCH(;)
+}
+
+STDMETHODIMP CMgaRegistrar::put_ParadigmExtraInfo(regaccessmode_enum mode, BSTR paradigmName, BSTR paradigmVersionGuid, BSTR name, BSTR newVal)
+{
+	CString paradigmNameStr = PutInCString(paradigmName);
+	CString paradigmGuidStr = PutInCString(paradigmVersionGuid);
+	CString nameStr = PutInCString(name);
+
+	COMTRY
+	{
+		if (mode & RM_SYS) {
+			CRegKey para;
+			LPCTSTR regpath = rootreg + _T("\\Paradigms\\") + paradigmNameStr + _T("\\") + paradigmGuidStr;
+			LONG res = para.Open(HKEY_LOCAL_MACHINE, regpath, KEY_WRITE);
+			if (res != ERROR_SUCCESS && res != ERROR_ACCESS_DENIED && res != ERROR_FILE_NOT_FOUND) {
+				ERRTHROW(res);
+			}
+			if (res == ERROR_SUCCESS) {
+				if (!newVal) {
+					para.DeleteValue(nameStr);
+				}
+				else {
+					para.SetStringValue(nameStr, PutInCString(newVal));
+				}
+			}
+		}
+		if (mode & RM_USER) {
+			CRegKey para;
+			LPCTSTR regpath = rootreg + _T("\\Paradigms\\") + paradigmNameStr + _T("\\") + paradigmGuidStr;
+			LONG res = para.Open(HKEY_CURRENT_USER, regpath, KEY_WRITE);
+			if (res != ERROR_SUCCESS && res != ERROR_ACCESS_DENIED && res != ERROR_FILE_NOT_FOUND) {
+				ERRTHROW(res);
+			}
+			if (res == ERROR_SUCCESS) {
+				if (!newVal) {
+					para.DeleteValue(nameStr);
+				}
+				else {
+					para.SetStringValue(nameStr, PutInCString(newVal));
+				}
+			}
+		}
+	} COMCATCH(;)
+}
+
+STDMETHODIMP CMgaRegistrar::get_ParadigmExtraInfo(regaccessmode_enum mode, BSTR paradigmName, BSTR paradigmVersionGuid, BSTR name, BSTR * pVal)
+{
+	CHECK_OUT(pVal);
+
+	if ((mode & RM_BOTH) == RM_BOTH) {
+		HRESULT res;
+		res = this->get_ParadigmExtraInfo(REGACCESS_USER, paradigmName, paradigmVersionGuid, name, pVal);
+		CString val = PutInCString(*pVal);
+		if (val.IsEmpty()) {
+			res = this->get_ParadigmExtraInfo(REGACCESS_SYSTEM, paradigmName, paradigmVersionGuid, name, pVal);
+		}
+		return res;
+	}
+
+	CString paradigmNameStr = PutInCString(paradigmName);
+	CString paradigmGuidStr = PutInCString(paradigmVersionGuid);
+	CString nameStr = PutInCString(name);
+
+	COMTRY
+	{
+		HKEY hive = (mode & RM_SYS ? HKEY_LOCAL_MACHINE : (mode & RM_USER ? HKEY_CURRENT_USER : NULL));
+		if (hive != NULL)
+		{
+			CRegKey para;
+			LPCTSTR regpath = rootreg + _T("\\Paradigms\\") + paradigmNameStr + _T("\\") + paradigmGuidStr;
+			LONG res = para.Open(hive, regpath, KEY_READ);
+
+			if (res != ERROR_SUCCESS && res != ERROR_ACCESS_DENIED && res != ERROR_FILE_NOT_FOUND) ERRTHROW(res);
+			if (res == ERROR_SUCCESS) {
+				ULONG count = 0;
+				if (para.QueryStringValue(nameStr, NULL, &count) == ERROR_SUCCESS) {
+					CString retVal;
+					if (para.QueryStringValue(nameStr, retVal.GetBufferSetLength(count), &count) == ERROR_SUCCESS) {
+						retVal.ReleaseBuffer();
+						CopyTo(retVal, pVal);
+						return S_OK;
+					}
+				}
+			}
+		}
+		return E_NOTFOUND;
 	}
 	COMCATCH(;)
 }

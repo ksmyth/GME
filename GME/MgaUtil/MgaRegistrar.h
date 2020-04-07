@@ -8,8 +8,8 @@
 class ATL_NO_VTABLE CMgaRegistrar : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CMgaRegistrar, &__uuidof(MgaRegistrar)>,
-	public IDispatchImpl<IMgaRegistrar, &__uuidof(IMgaRegistrar), &__uuidof(__MGAUtilLib)>,
-	public ISupportErrorInfoImpl<&__uuidof(IMgaRegistrar)>,
+	public IDispatchImpl<IMgaRegistrar2, &__uuidof(IMgaRegistrar2), &__uuidof(__MGAUtilLib)>,
+	public ISupportErrorInfoImpl2<&__uuidof(IMgaRegistrar), &__uuidof(IMgaRegistrar2)>,
 	public IGMEVersionInfoImpl
 {
 public:
@@ -20,7 +20,8 @@ DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 BEGIN_COM_MAP(CMgaRegistrar)
 	COM_INTERFACE_ENTRY(IMgaRegistrar)
-	COM_INTERFACE_ENTRY(IDispatch)
+	COM_INTERFACE_ENTRY(IMgaRegistrar2)
+	COM_INTERFACE_ENTRY2(IDispatch, IMgaRegistrar2)
 	COM_INTERFACE_ENTRY(ISupportErrorInfo)
 	COM_INTERFACE_ENTRY_IID(__uuidof(IGMEVersionInfo), IGMEVersionInfoImpl)
 END_COM_MAP()
@@ -141,6 +142,13 @@ public:
 
 	STDMETHOD(RegisterComponentLibrary)(BSTR path, regaccessmode_enum mode);
 	STDMETHOD(UnregisterComponentLibrary)(BSTR path, regaccessmode_enum mode);
+
+	// --- IMgaRegistrar2
+
+	STDMETHOD(put_ParadigmExtraInfo)(regaccessmode_enum mode, BSTR paradigmName, BSTR paradigmVersionGuid, BSTR name, BSTR newVal);
+	STDMETHOD(get_ParadigmExtraInfo)(regaccessmode_enum mode, BSTR paradigmName, BSTR paradigmVersionGuid, BSTR name, BSTR* pVal);
+	STDMETHOD(SetParadigmExtraInfoDisp)(BSTR paradigmName, BSTR paradigmVersionGuid, BSTR name, BSTR newVal, regaccessmode_enum mode = REGACCESS_SYSTEM) { return this->put_ParadigmExtraInfo(mode, paradigmName, paradigmVersionGuid, name, newVal); }
+	STDMETHOD(GetParadigmExtraInfoDisp)(BSTR paradigmName, BSTR paradigmVersionGuid, BSTR name, BSTR* pVal) { return this->get_ParadigmExtraInfo(REGACCESS_BOTH, paradigmName, paradigmVersionGuid, name, pVal); }
 };
 
 #endif//MGA_MGAREGISTRAR_H

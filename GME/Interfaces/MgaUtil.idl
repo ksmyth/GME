@@ -517,6 +517,28 @@ interface IMgaRegistrar : IDispatch
 	HRESULT UnregisterComponentLibrary([in] BSTR path, [in] regaccessmode_enum mode);
 };
 
+[
+	object,
+	uuid(0E3C2752-6173-4050-BD47-AE54DA1C373A),
+	dual,
+	helpstring("IMgaRegistrar2 Interface"),
+	pointer_default(unique)
+]
+interface IMgaRegistrar2 : IMgaRegistrar
+{
+	[propput, helpstring("property ParadigmExtraInfo")]
+	HRESULT ParadigmExtraInfo([in] regaccessmode_enum mode, [in] BSTR ParadigmName, [in] BSTR ParadigmVersionGUID, [in] BSTR name, [in] BSTR newVal);
+
+	[propget, helpstring("property ParadigmExtraInfo")]
+	HRESULT ParadigmExtraInfo([in] regaccessmode_enum mode, [in] BSTR ParadigmName, [in] BSTR ParadigmVersionGUID, [in] BSTR name, [out, retval] BSTR *pVal);
+
+	[helpstring("setter for property ParadigmExtraInfo")]
+	HRESULT SetParadigmExtraInfoDisp([in] BSTR ParadigmName, [in] BSTR ParadigmVersionGUID, [in] BSTR name, [in] BSTR newVal, [in, defaultvalue(REGACCESS_SYSTEM)] regaccessmode_enum mode);
+
+	[helpstring("getter for property ParadigmExtraInfo")]
+	HRESULT GetParadigmExtraInfoDisp([in] BSTR ParadigmName, [in] BSTR ParadigmVersionGUID, [in] BSTR name, [out, retval] BSTR *pVal);
+};
+
 typedef enum metadlg_enum
 {
 	METADLG_NONE =		0x0000,

@@ -520,16 +520,22 @@
 #define ID_CONNCNTX_REVERSE             33270
 #define ID_VIEW_SHOWCONNECTEDPORTSONLY  33271
 #define ID_PORTCNTX_DELETE              33272
+#pragma region Help IDs
+#define ID_HELP_PARADIGMHELP            0x9000
+#define ID_HELP_PARADIGMHELP_FIRST      0x9001
+#define ID_HELP_PARADIGMHELP_LAST       0x900F
+#define ID_HELP_COMPONENTHELP           0x9010
+#define ID_HELP_COMPONENTHELP_FIRST     0x9011
+#define ID_HELP_COMPONENTHELP_LAST      0x908F
+#pragma endregion
 #define IDW_TOOLBAR_MAIN                0xE820
 #define IDW_TOOLBAR_WINS                0xE821
 #define IDW_TOOLBAR_COMPONENT           0xE822
 #define IDW_TOOLBAR_MODE                0xE823
 #define IDW_TOOLBAR_NAVIG               0xE824
 #define IDW_TOOLBAR_MODELING            0xE825
-
-
-#define ID_FILE_INTERPRET_LAST ID_FILE_INTERPRET49
 #define ID_FILE_RUNPLUGIN_LAST ID_FILE_RUNPLUGIN8
+#define ID_FILE_INTERPRET_LAST ID_FILE_INTERPRET49
 
 // Next default values for new objects
 // 
