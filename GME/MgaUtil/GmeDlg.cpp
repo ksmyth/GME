@@ -272,6 +272,7 @@ void CGmeDlg::fillScripEngineList()
 		lvItem.iSubItem = 0;
 		int ret1 = m_ScriptEgines.SetItem( &lvItem );
 	}
+	m_ScriptEgines.SetColumnWidth(0, LVSCW_AUTOSIZE);
 }
 
 BOOL CGmeDlg::OnInitDialog() 
