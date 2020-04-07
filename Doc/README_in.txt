@@ -25,6 +25,11 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
+Release Notes
+----------------------------------
+  - Binary compatibility with 11.12.2
+  - Fix bug where 'Do you want to save?' dialog appears too often
+
 Release Notes of Release 20.2.12
 ----------------------------------
   - Binary compatibility with 11.12.2

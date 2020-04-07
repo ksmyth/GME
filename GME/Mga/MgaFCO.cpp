@@ -80,7 +80,7 @@ void FCO::getinterface<IMgaObject>(IMgaObject **p, CMgaTerritory *terr) {
 //throws!!
 long FCO::getstatus() {
 		if(!mgaproject) COMTHROW(E_MGA_ZOMBIE_NOPROJECT);
-		if(!mgaproject->opened) COMTHROW(E_MGA_ZOMBIE_CLOSED_PROJECT);
+		if(!mgaproject->opened_flag) COMTHROW(E_MGA_ZOMBIE_CLOSED_PROJECT);
 		if(!mgaproject->activeterr) COMTHROW(E_MGA_NOT_IN_TRANSACTION);
 		VARIANT_BOOL pp;
 		if(self->get_IsDeleted(&pp) != S_OK) return OBJECT_ZOMBIE;

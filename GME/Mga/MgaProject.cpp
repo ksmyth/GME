@@ -23,7 +23,7 @@ CMgaProject::CMgaProject()	{
 #ifdef DEBUG
 			MGA_TRACE("Constructed: %s - %08X\n", sig, this);
 #endif
-			opened = CLOSED;
+			opened_flag = OPENED_FLAG_CLOSED;
 			dataproject = NULL;
 			preferences = 0;
 			opmask = 0x0026662A;
@@ -56,7 +56,7 @@ CMgaProject::~CMgaProject()	{
 #endif
 		MARKSIG('9'); 
 		ASSERT(allterrs.empty());
-		if(opened != CLOSED) { 
+		if(opened_flag != OPENED_FLAG_CLOSED) {
 			Close();
 		}
 }
@@ -122,7 +122,6 @@ HRESULT CMgaProject::CreateSetupData(BSTR rootname, BSTR paradigmname, VARIANT g
 			COMTHROW(metapr->get_RootFolder(&mf));
 			COMTHROW(mf->get_MetaRef(&mr));
 			rootfolder[ATTRID_META] = mr;
-			notifyqueueprocessed = true;
 		} COMCATCH_IN_TRANSACTION(;);
 
 }
@@ -195,7 +194,7 @@ STDMETHODIMP CMgaProject::OpenParadigm(BSTR s, BSTR ver) {
 
 STDMETHODIMP CMgaProject::CreateEx(BSTR projectname, BSTR paradigmname, VARIANT paradigmGUID) {
 	COMTRY {
-		if(opened != CLOSED) COMTHROW(E_MGA_PROJECT_OPEN);
+		if(opened_flag != OPENED_FLAG_CLOSED) COMTHROW(E_MGA_PROJECT_OPEN);
 
 		mgaversion = 2;
 			// Set generic for meta
@@ -208,7 +207,7 @@ STDMETHODIMP CMgaProject::CreateEx(BSTR projectname, BSTR paradigmname, VARIANT 
 	
 		int undosize = getMaxUndoSize();
 		COMTHROW(dataproject->CreateProject2(projectname, undosize, genericproject));
-		opened = UNCHANGED;
+		opened_flag = OPENED_FLAG_UNCHANGED;
 		guidstat = DIRTY;
 
 	    CComPtr<IMgaTerritory> lm;
@@ -251,7 +250,7 @@ STDMETHODIMP CMgaProject::CreateEx(BSTR projectname, BSTR paradigmname, VARIANT 
 		MARKSIG('2');
 	}
 	COMCATCH(
-		opened = CLOSED;
+		opened_flag = OPENED_FLAG_CLOSED;
 		guidstat = CLEAN;
 		if (dataproject) {
 			dataproject->CloseProject(VARIANT_TRUE);
@@ -277,7 +276,7 @@ STDMETHODIMP CMgaProject::CreateEx(BSTR projectname, BSTR paradigmname, VARIANT 
 // if no guid change skip check
 STDMETHODIMP CMgaProject::OpenEx(BSTR projectname, BSTR paradigmname, VARIANT paradigmGUID) {
 	COMTRY {
-		if(opened != CLOSED) COMTHROW(E_MGA_PROJECT_OPEN);
+		if(opened_flag != OPENED_FLAG_CLOSED) COMTHROW(E_MGA_PROJECT_OPEN);
 		CComBSTR s;
 		CComVariant pGUID;
 		CComBSTR ver;
@@ -290,7 +289,7 @@ STDMETHODIMP CMgaProject::OpenEx(BSTR projectname, BSTR paradigmname, VARIANT pa
 		
 		projconn = projectname;
 
-		opened = UNCHANGED;
+		opened_flag = OPENED_FLAG_UNCHANGED;
 		guidstat = CLEAN;
 	    CComPtr<IMgaTerritory> lm;
 	    COMTHROW(CreateTerritory(NULL, &lm));
@@ -302,8 +301,8 @@ STDMETHODIMP CMgaProject::OpenEx(BSTR projectname, BSTR paradigmname, VARIANT pa
 			COMTHROW(dataproject->get_RootObject(&dataroot.ComPtr()));
 		    s=dataroot[ATTRID_PARADIGM];
 			mgaversion = dataroot[ATTRID_MGAVERSION];
-			if( mgaversion <= 1L) // Core layer changed the project by adding ATTRID_GUID1..4 for CCoreBinFile
-				opened = CHANGED;
+			if (mgaversion <= 1L) // Core layer changed the project by adding ATTRID_GUID1..4 for CCoreBinFile
+				opened_flag = OPENED_FLAG_CHANGED;
 
 			pGUID=CComVariant(dataroot[ATTRID_PARGUID]);
 			ver = dataroot[ATTRID_PARVERSION];
@@ -376,7 +375,7 @@ STDMETHODIMP CMgaProject::OpenEx(BSTR projectname, BSTR paradigmname, VARIANT pa
 					dataroot[ATTRID_PARGUID] = pGUID;
 					dataroot[ATTRID_PARVERSION] = ver;
 					COMTHROW(CommitTransaction());
-					opened = CHANGED;
+					opened_flag = OPENED_FLAG_CHANGED;
 					guidstat = DIRTY;
 				} catch(hresult_exception &e) {
 					lm->Flush();
@@ -400,7 +399,7 @@ STDMETHODIMP CMgaProject::OpenEx(BSTR projectname, BSTR paradigmname, VARIANT pa
 		MARKSIG('2');
 	} 
 	COMCATCH(
-		opened = CLOSED;
+		opened_flag = OPENED_FLAG_CLOSED;
 		guidstat = CLEAN;
 		if (dataproject)
 			dataproject->CloseProject(VARIANT_TRUE);
@@ -419,7 +418,7 @@ STDMETHODIMP CMgaProject::OpenEx(BSTR projectname, BSTR paradigmname, VARIANT pa
 STDMETHODIMP CMgaProject::Open(BSTR projectname, VARIANT_BOOL *ro_mode)
 {
 	COMTRY {
-		if(opened != CLOSED) COMTHROW(E_MGA_PROJECT_OPEN);
+		if (opened_flag != OPENED_FLAG_CLOSED) COMTHROW(E_MGA_PROJECT_OPEN);
 		CComBSTR s;
 		CComVariant pGUID;
 		CComBSTR ver;
@@ -431,7 +430,7 @@ STDMETHODIMP CMgaProject::Open(BSTR projectname, VARIANT_BOOL *ro_mode)
 		
 		projconn = projectname;
 
-		opened = UNCHANGED;
+		opened_flag = OPENED_FLAG_UNCHANGED;
 		guidstat = CLEAN;
 	    CComPtr<IMgaTerritory> lm;
 	    COMTHROW(CreateTerritory(NULL, &lm));
@@ -444,7 +443,7 @@ STDMETHODIMP CMgaProject::Open(BSTR projectname, VARIANT_BOOL *ro_mode)
 		    s=dataroot[ATTRID_PARADIGM];
 			mgaversion = dataroot[ATTRID_MGAVERSION];
 			if( mgaversion <= 1L) // Core layer changed the project by adding ATTRID_GUID1..4 for CCoreBinFile
-				opened = CHANGED;
+				opened_flag = OPENED_FLAG_CHANGED;
 
 			pGUID=CComVariant(dataroot[ATTRID_PARGUID]);
 			ver=dataroot[ATTRID_PARVERSION];
@@ -498,7 +497,7 @@ STDMETHODIMP CMgaProject::Open(BSTR projectname, VARIANT_BOOL *ro_mode)
 					COMTHROW(dataproject->get_RootObject(&dataroot.ComPtr()));
 					dataroot[ATTRID_PARGUID] = nGUID;
 					COMTHROW(CommitTransaction());
-					opened = CHANGED;
+					opened_flag = OPENED_FLAG_CHANGED;
 					guidstat = DIRTY;
 				} catch(hresult_exception &e) {
 					lm->Flush();
@@ -523,7 +522,7 @@ STDMETHODIMP CMgaProject::Open(BSTR projectname, VARIANT_BOOL *ro_mode)
 		MARKSIG('2');
 	} 
 	COMCATCH(
-		opened = CLOSED;
+		opened_flag = OPENED_FLAG_CLOSED;
 		if (dataproject)
 			dataproject->CloseProject(VARIANT_TRUE);
 		if (metapr)
@@ -595,9 +594,9 @@ STDMETHODIMP CMgaProject::Save(BSTR newname, VARIANT_BOOL keepoldname)
 			COMTHROW(CreateTerritory(NULL, &t));
 			// if mga_ver<=1 the Core layer changed the project by adding ATTRID_GUID1..4
 			// (mgaversion <= 1L) -> (opened >= CHANGED)
-			ASSERT( !(mgaversion <= 1L) || opened >= CHANGED);
+			ASSERT( !(mgaversion <= 1L) || opened_flag >= OPENED_FLAG_CHANGED);
 
-			if(opened >= CHANGED) {
+			if (opened_flag >= OPENED_FLAG_CHANGED) {
 				COMTHROW(BeginTransaction(t, TRANSACTION_GENERAL));
 				try {
 					CoreObj self;
@@ -616,14 +615,14 @@ STDMETHODIMP CMgaProject::Save(BSTR newname, VARIANT_BOOL keepoldname)
 		if (FAILED(hr))
 			return hr;
 		if(CComBSTR(newname).Length()) {
-			if (!keepoldname) {
+			if (keepoldname == VARIANT_FALSE) {
 				projconn = newname;
-				opened = UNCHANGED;
+				opened_flag = OPENED_FLAG_UNCHANGED;
 				transactioncount = 0;
 			}
 
 		} else {
-			opened = UNCHANGED;
+			opened_flag = OPENED_FLAG_UNCHANGED;
 			transactioncount = 0;
 		}
 	}
@@ -632,7 +631,7 @@ STDMETHODIMP CMgaProject::Save(BSTR newname, VARIANT_BOOL keepoldname)
 
 STDMETHODIMP CMgaProject::Close(VARIANT_BOOL abort)
 {
-	if(opened == CLOSED) {
+	if (opened_flag == OPENED_FLAG_CLOSED) {
 		ASSERT(("Project is closed but transaction is active", !baseterr));
 		return S_OK;
 	}
@@ -642,7 +641,7 @@ STDMETHODIMP CMgaProject::Close(VARIANT_BOOL abort)
 		{
 			CComPtr<IMgaTerritory> t;
 			COMTHROW(CreateTerritory(NULL, &t));
-			bool write = !abort && opened >= CHANGED;
+			bool write = !abort && opened_flag >= OPENED_FLAG_CHANGED;
 			COMTHROW(BeginTransaction(t, write ? TRANSACTION_GENERAL : TRANSACTION_READ_ONLY));
 			try {
 				if(write) {
@@ -669,13 +668,13 @@ STDMETHODIMP CMgaProject::Close(VARIANT_BOOL abort)
 		}
 
 	    MARKSIG('8');
-		opened = CLOSED;
+		opened_flag = OPENED_FLAG_CLOSED;
 		guidstat = CLEAN;
 		projconn.Empty(); 
 		parconn.Empty();
 		transactioncount = 0;
 	}
-	COMCATCH( opened = CLOSEERROR;);	//  You cannot rollback a failed Close completely, so I did not even try it.
+	COMCATCH( opened_flag = OPENED_FLAG_CLOSEERROR;);	//  You cannot rollback a failed Close completely, so I did not even try it.
 }
 
 #undef mgaproject
@@ -907,7 +906,6 @@ STDMETHODIMP CMgaProject::put_Author(BSTR newVal)
 		CoreObj self;
 		COMTHROW(dataproject->get_RootObject(&self.ComPtr()));
 		self[ATTRID_CREATOR] = newVal;
-		notifyqueueprocessed = true;
 		COMTHROW(GlobalNotify(GLOBALEVENT_PROJECT_PROPERTIES));
     }
     COMCATCH_IN_TRANSACTION(;);
@@ -1008,7 +1006,6 @@ STDMETHODIMP CMgaProject::put_GUID(VARIANT newVal)
 
 		self[ATTRID_GUID] = newVal;
 		guidstat = MANUAL;
-		notifyqueueprocessed = true;
 		COMTHROW(GlobalNotify(GLOBALEVENT_PROJECT_PROPERTIES));
     }
     COMCATCH_IN_TRANSACTION(;);
@@ -1033,7 +1030,6 @@ STDMETHODIMP CMgaProject::put_Comment(BSTR newVal)
 		CoreObj self;
 		COMTHROW(dataproject->get_RootObject(&self.ComPtr()));
 		self[ATTRID_EXTDATA] = newVal;
-		notifyqueueprocessed = true;
 		COMTHROW(GlobalNotify(GLOBALEVENT_PROJECT_PROPERTIES));
     }
     COMCATCH_IN_TRANSACTION(;);
@@ -1047,7 +1043,6 @@ STDMETHODIMP CMgaProject::put_Name(BSTR newVal)
 		CoreObj self;
 		COMTHROW(dataproject->get_RootObject(&self.ComPtr()));
 		self[ATTRID_NAME] = newVal;
-		notifyqueueprocessed = true;
 		COMTHROW(GlobalNotify(GLOBALEVENT_PROJECT_PROPERTIES));
     }
     COMCATCH_IN_TRANSACTION(;);
@@ -1061,7 +1056,6 @@ STDMETHODIMP CMgaProject::put_Version(BSTR newVal)
 		CoreObj self;
 		COMTHROW(dataproject->get_RootObject(&self.ComPtr()));
 		self[ATTRID_VERSION] = newVal;
-		notifyqueueprocessed = true;
 		COMTHROW(GlobalNotify(GLOBALEVENT_PROJECT_PROPERTIES));
     }
     COMCATCH_IN_TRANSACTION(;);
@@ -1271,7 +1265,7 @@ STDMETHODIMP CMgaProject::EnableAutoAddOns(VARIANT_BOOL bEnable) {
 		bool bnew = (bEnable == VARIANT_TRUE);
 		if(bnew == autoaddons) return S_OK;
 		autoaddons = bnew;
-		if(opened != CLOSED) {
+		if (opened_flag != OPENED_FLAG_CLOSED) {
 			if(autoaddons) StartAutoAddOns();
 			else StopAutoAddOns();
 		}
@@ -1373,14 +1367,14 @@ void CMgaProject::RemoveClients() {
 STDMETHODIMP CMgaProject::get_ProjectStatus(long *status) {
 	COMTRY {
 		CHECK_OUTPAR(status);
-		if(opened == CLOSED) {
+		if (opened_flag == OPENED_FLAG_CLOSED) {
 			*status  = 0;
 		}	
-		else if(opened == CLOSEERROR) {
+		else if(opened_flag == OPENED_FLAG_CLOSEERROR) {
 			*status = 0x80000000;
 		}
 		else {
-			*status = 1 + (opened == CHANGED ? 4 : 0) + (baseterr ? 8 : 0) + (read_only ? 16 : 0);
+			*status = 1 + (opened_flag == OPENED_FLAG_CHANGED ? 4 : 0) + (baseterr ? 8 : 0) + (read_only ? 16 : 0);
 		}
 	} COMCATCH(;);
 }
@@ -1425,7 +1419,6 @@ STDMETHODIMP CMgaProject::BeginTransaction(IMgaTerritory *ter, transactiontype_e
 		if (FAILED(hr))
 			COMRETURN(hr);
 		baseterr = activeterr = t;
-		notifyqueueprocessed = false;
 		MARKSIG('3');
     }
     COMCATCH(;);
@@ -1487,13 +1480,20 @@ STDMETHODIMP CMgaProject::CommitTransaction()
 		COMTHROW(dataproject->get_NestedTransactionCount(&nestedCount));
 		if (nestedCount == 1 && !read_only)
 			COMTHROW(GlobalNotify(GLOBALEVENT_COMMIT_TRANSACTION));
+
+
+		short undosize;
+		short undosizenew;
+		COMTHROW(dataproject->get_UndoQueueSize(&undosize));
 		COMTHROW(dataproject->CommitTransaction(read_only ? TRANSTYPE_READFIRST: TRANSTYPE_FIRST));
-        baseterr = activeterr= NULL;
+		COMTHROW(dataproject->get_UndoQueueSize(&undosizenew));
+		baseterr = activeterr= NULL;
 		read_only = false;
 
-		if(notifyqueueprocessed) {
+		if (undosize != undosizenew) {
+			// this means there were changes to the core project, and we can undo this transaction
 			transactioncount++;
-			opened = CHANGED;
+			opened_flag = OPENED_FLAG_CHANGED;
 			if (guidstat == MANUAL) {
 				guidstat = CLEAN;
 			}
@@ -1622,8 +1622,6 @@ STDMETHODIMP CMgaProject::CommitNotify() {
                 if(!baseterr)
 					COMTHROW(E_MGA_NOT_IN_TRANSACTION);
 
-                if(!changedobjs.empty())
-					notifyqueueprocessed = true;
                 while(!changedobjs.empty()) {
                                 FCOPtr f = changedobjs.front();
                                 changedobjs.pop();
@@ -1657,7 +1655,7 @@ HRESULT CMgaProject::beginnested() {
 	ASSERT(!in_nested);
 
 	ASSERT(objstocheck.empty());
-	objstocheck.clear();		
+	objstocheck.clear();
 
 	HRESULT hr;
 	if (non_nestable)
@@ -1665,7 +1663,7 @@ HRESULT CMgaProject::beginnested() {
 	else
 		hr = dataproject->BeginTransaction(TRANSTYPE_NESTED);
 
-    MARKSIG('4');
+	MARKSIG('4');
 	if (hr == S_OK)
 		in_nested = true;
 	return hr;
@@ -1680,12 +1678,12 @@ HRESULT CMgaProject::commitnested() {
 	HRESULT hr = S_OK;
 	if (!non_nestable)
 		hr = dataproject->CommitTransaction(TRANSTYPE_NESTED);
-    MARKSIG('6');
+	MARKSIG('6');
 	if (hr != S_OK)
 		abortnested();
-	else { 
+	else {
 		in_nested = false;
-		while(!temporalobjs.empty()) {
+		while (!temporalobjs.empty()) {
 			temporalobjs.front()->objrecordchange();
 			temporalobjs.pop();
 		}
@@ -1697,11 +1695,11 @@ HRESULT CMgaProject::abortnested() {
 	ASSERT(in_nested);
 	objstocheck.clear();
 	in_nested = false;
-	while(!temporalobjs.empty()) {
-			temporalobjs.front()->objforgetchange();
-			temporalobjs.pop();
+	while (!temporalobjs.empty()) {
+		temporalobjs.front()->objforgetchange();
+		temporalobjs.pop();
 	}
-    MARKSIG('5');
+	MARKSIG('5');
 	must_abort = true;
 	if (non_nestable)
 		return S_OK;
@@ -1711,16 +1709,16 @@ HRESULT CMgaProject::abortnested() {
 
 
 HRESULT CMgaProject::pushterr(CMgaTerritory &ter) {
-	COMTRY {
-		ASSERT(("Territorys overwrite each other",activeterr==baseterr));
+	COMTRY{
+		ASSERT(("Territorys overwrite each other",activeterr == baseterr));
 		activeterr = &ter;
 		COMTHROW(dataproject->PushTerritory(ter.coreterr));
 	} COMCATCH(;);
 }
 
 HRESULT CMgaProject::popterr() {
-	COMTRY {
-		activeterr= baseterr;
+	COMTRY{
+		activeterr = baseterr;
 		COMTHROW(dataproject->PopTerritory());
 	} COMCATCH(;);
 }
@@ -1728,12 +1726,17 @@ HRESULT CMgaProject::popterr() {
 
 
 STDMETHODIMP CMgaProject::Undo() {
-	COMTRY {
-		if(baseterr) COMTHROW(E_MGA_ALREADY_IN_TRANSACTION);
+	COMTRY{
+		if (baseterr) COMTHROW(E_MGA_ALREADY_IN_TRANSACTION);
 		COMTHROW(dataproject->UndoTransaction());
-		if(!--transactioncount) {
-			opened = UNCHANGED;
+		transactioncount--;
+		if (transactioncount == 0) {
+			opened_flag = OPENED_FLAG_UNCHANGED;
 			guidstat = CLEAN;
+		}
+		else {
+			opened_flag = OPENED_FLAG_CHANGED;
+			guidstat = DIRTY;
 		}
 		{
 			aurcnt++;
@@ -1743,18 +1746,25 @@ STDMETHODIMP CMgaProject::Undo() {
 			GlobalNotify(GLOBALEVENT_UNDO);
 			COMTHROW(CommitTransaction());
 		}
-    }
-    COMCATCH(;);
+	}
+	COMCATCH(;);
 }
 
 STDMETHODIMP CMgaProject::Redo() {
 
-	COMTRY {
-		if(baseterr) COMTHROW(E_MGA_ALREADY_IN_TRANSACTION);
+	COMTRY{
+		if (baseterr)
+			COMTHROW(E_MGA_ALREADY_IN_TRANSACTION);
 		COMTHROW(dataproject->RedoTransaction());
 		transactioncount++;
-		opened = CHANGED;
-		guidstat = DIRTY;
+		if (transactioncount == 0) {
+			opened_flag = OPENED_FLAG_UNCHANGED;
+			guidstat = CLEAN;
+		} else {
+			opened_flag = OPENED_FLAG_CHANGED;
+			guidstat = DIRTY;
+		}
+
 		{
 			aurcnt++;
 			CComPtr<IMgaTerritory> t;

@@ -280,7 +280,7 @@ class Transaction {
 public:
 	HRESULT Begin(CMgaProject *ppr) {
 		if(!ppr) { SetStandardOrGMEErrorInfo(E_MGA_ZOMBIE_NOPROJECT); return E_MGA_ZOMBIE_NOPROJECT; }
-		if(!ppr->opened) { SetStandardOrGMEErrorInfo(E_MGA_ZOMBIE_CLOSED_PROJECT); return E_MGA_ZOMBIE_CLOSED_PROJECT; }
+		if(!ppr->opened_flag) { SetStandardOrGMEErrorInfo(E_MGA_ZOMBIE_CLOSED_PROJECT); return E_MGA_ZOMBIE_CLOSED_PROJECT; }
 		if(!ppr->activeterr) { SetStandardOrGMEErrorInfo(E_MGA_NOT_IN_TRANSACTION); return E_MGA_NOT_IN_TRANSACTION; }
 		if(ppr->alreadynested()) {
 			pr = NULL;
@@ -417,9 +417,6 @@ else \
 	} \
   } while(0);
 
-
-
-#define MODIFIED	{ if(mgaproject->opened < 1000) mgaproject->opened++; }
 
 #undef COMCATCH
 #define COMCATCH( CLEANUP )  \

@@ -322,6 +322,8 @@ END_COM_MAP()
 private:
 //Notification
 	unsigned long changemask, notifymask, temporalmask;
+	// CMgaProject needs changemask
+	friend class CMgaProject;
 
 // PreDelete Notification by Tihamer for the PAMS SynchTool
 	void PreDeleteNotify();

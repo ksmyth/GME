@@ -229,11 +229,10 @@ public:
 	CComVariant pendingguid;
 	enum guidmodes { CLEAN, DIRTY, PENDING, MANUAL};
 
-	enum openmodes { CLOSED = 0, UNCHANGED = 1, CHANGED = 2, CLOSEERROR = 4}; 
+	enum open_flags { OPENED_FLAG_CLOSED = 0, OPENED_FLAG_UNCHANGED = 1, OPENED_FLAG_CHANGED = 2, OPENED_FLAG_CLOSEERROR = 4};
 	int transactioncount;
-	bool notifyqueueprocessed;
 
-	int opened;
+	int opened_flag;
 	int aurcnt;   // Abort/undo/redo count
 	coreobjhash objstocheck;
 

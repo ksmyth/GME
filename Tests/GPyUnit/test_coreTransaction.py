@@ -106,6 +106,50 @@ class CoreAbortTransaction(unittest.TestCase):
         project.Close(True)
         del(terr)
 
+    def testModificationDetection(self):
+        project = DispatchEx('Mga.MgaProject')
+        project.Create(self.connstr, 'MetaGME')
+        paradigmSheet = project.RootMeta.RootFolder.DefinedFCOByName('ParadigmSheet', True)
+        self.assertEquals(project.ProjectStatus & 4, 4)
+        project.Preferences = 0x00000080
+        project.BeginTransactionInNewTerr()
+        base = project.RootFolder.CreateRootObject(paradigmSheet)
+        base.CreateChildObject(paradigmSheet.RoleByName('Atom'))
+        for i in range(20):
+            base.ParentFolder.DeriveRootObject(base, True)
+        base_id = base.ID
+        project.CommitTransaction()
+
+        self.assertEquals(project.UndoRedoSize(), (1, 0))
+        self.assertEquals(project.ProjectStatus & 4, 4)
+
+        for i in range(1, 20):
+            terr = project.BeginTransactionInNewTerr()
+            base = project.GetObjectByID(base_id)
+            derived = base.DerivedObjects.Item(i)
+            base.SetRegistryValueDisp('random', 'asdf')
+            base.Name = 'super'
+            project.CommitTransaction()
+            self.assertEquals(project.ProjectStatus & 4, 4)
+            if i == 11:
+                project.Save(project.ProjectConnStr, False)
+                self.assertEquals(project.ProjectStatus & 4, 0)
+        for i in range(7):
+            project.Undo()
+            self.assertEquals(project.ProjectStatus & 4, 4)
+        project.Undo()
+        self.assertEquals(project.ProjectStatus & 4, 0)
+        project.Redo()
+        self.assertEquals(project.ProjectStatus & 4, 4)
+        project.Undo()
+        self.assertEquals(project.ProjectStatus & 4, 0)
+        project.Undo()
+        self.assertEquals(project.ProjectStatus & 4, 4)
+        project.Redo()
+        self.assertEquals(project.ProjectStatus & 4, 0)
+        project.Close(True)
+
+
     @property
     def connstr(self):
         return 'MGA=' + _adjacent_file('tmp.mga')
