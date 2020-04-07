@@ -184,7 +184,7 @@ BOOL CAnnotationBrowserDlg::OnInitDialog()
 			lvItem.lParam = (LPARAM)node;
 
 			int retIdx = m_wndAnnotationList.InsertItem(&lvItem);
-			if (node->m_regNode->Path == m_focus->Path) {
+			if (m_focus && node->m_regNode->Path == m_focus->Path) {
 				focusIdx = retIdx;
 			}
 
