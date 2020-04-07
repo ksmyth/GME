@@ -2183,6 +2183,7 @@ void CGMEView::Reset(bool doInvalidate)
 		contextSelection = nullptr;
 		contextPort = nullptr;
 		selectedContextConnection = nullptr;
+		connTmp = nullptr;
 		children.RemoveAll();
 		annotators.RemoveAll();
 		connections.RemoveAll();
