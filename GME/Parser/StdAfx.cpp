@@ -26,12 +26,12 @@ struct _XMLPlatformUtilsCriticalSection {
 #include <xercesc/util/PlatformUtils.hpp>
 XMLPlatformUtilsTerminate_RAII::XMLPlatformUtilsTerminate_RAII() {
 	EnterCriticalSection(&XMLPlatformUtilsCriticalSection.section);
-	xercesc_3_1::XMLPlatformUtils::Initialize();
+	XERCES_CPP_NAMESPACE_QUALIFIER XMLPlatformUtils::Initialize();
 	LeaveCriticalSection(&XMLPlatformUtilsCriticalSection.section);
 }
 
 XMLPlatformUtilsTerminate_RAII::~XMLPlatformUtilsTerminate_RAII() {
 	EnterCriticalSection(&XMLPlatformUtilsCriticalSection.section);
-	xercesc_3_1::XMLPlatformUtils::Terminate();
+	XERCES_CPP_NAMESPACE_QUALIFIER XMLPlatformUtils::Terminate();
 	LeaveCriticalSection(&XMLPlatformUtilsCriticalSection.section);
 }

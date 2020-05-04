@@ -132,9 +132,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy /Y/D/F ..\Lib\xerces-c_3_1.dll "$(OutDir)"</Command>
-      <Message>copy ..\Lib\xerces-c_3_1.dll "$(OutDir)"</Message>
-      <Outputs>$(OutDir)\xerces-c_3_1.dll</Outputs>
+      <Command>xcopy /Y/D/F ..\Lib\xerces-c_3_2Win32.dll "$(OutDir)"</Command>
+      <Message>copy ..\Lib\xerces-c_3_2Win32.dll "$(OutDir)"</Message>
+      <Outputs>$(OutDir)\xerces-c_3_2Win32.dll</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -173,9 +173,9 @@
       </DataExecutionPrevention>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy /Y/D/F ..\Lib\$(Platform)\xerces-c_3_1.dll "$(OutDir)"</Command>
-      <Message>copy ..\Lib\$(Platform)\xerces-c_3_1.dll "$(OutDir)"</Message>
-      <Outputs>$(OutDir)\xerces-c_3_1.dll</Outputs>
+      <Command>xcopy /Y/D/F ..\Lib\$(Platform)\xerces-c_3_2x64.dll "$(OutDir)"</Command>
+      <Message>copy ..\Lib\$(Platform)\xerces-c_3_2x64.dll "$(OutDir)"</Message>
+      <Outputs>$(OutDir)\xerces-c_3_2x64.dll</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -199,7 +199,7 @@
       <AdditionalIncludeDirectories>..\Interfaces;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>xerces-c_3D.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>xerces-c_3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>.\Parser.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -211,9 +211,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <CustomBuildStep>
-      <Outputs>$(OutDir)\xerces-c_3_1.dll</Outputs>
-      <Message>copy ..\Lib\xerces-c_3_1.dll "$(OutDir)"</Message>
-      <Command>xcopy /Y/D/F ..\Lib\xerces-c_3_1.dll "$(OutDir)"</Command>
+      <Outputs>$(OutDir)\xerces-c_3_2Win32.dll</Outputs>
+      <Message>copy ..\Lib\xerces-c_3_2Win32.dll "$(OutDir)"</Message>
+      <Command>xcopy /Y/D/F ..\Lib\xerces-c_3_2Win32.dll "$(OutDir)"</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -248,9 +248,9 @@
       </DataExecutionPrevention>
     </Link>
     <CustomBuildStep>
-      <Outputs>$(OutDir)\xerces-c_3_1.dll</Outputs>
-      <Message>copy ..\Lib\$(Platform)\xerces-c_3_1.dll "$(OutDir)"</Message>
-      <Command>xcopy /Y/D/F ..\Lib\$(Platform)\xerces-c_3_1.dll "$(OutDir)"</Command>
+      <Outputs>$(OutDir)\xerces-c_3_2x64.dll</Outputs>
+      <Message>copy ..\Lib\$(Platform)\xerces-c_3_2x64.dll "$(OutDir)"</Message>
+      <Command>xcopy /Y/D/F ..\Lib\$(Platform)\xerces-c_3_2x64.dll "$(OutDir)"</Command>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>

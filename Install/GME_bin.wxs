@@ -693,8 +693,12 @@
       </Component>
 
       <Component Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
-        <File Id="xerces_c_3_1.dll$(sys.BUILDARCH)" KeyPath="yes" Source="..\GME\$(var.lib)\xerces-c_3_1.dll" />
-      </Component>
+        <?if $(sys.BUILDARCH)=x86 ?>
+          <File Id="xerces_c_3_2.dll$(sys.BUILDARCH)" KeyPath="yes" Source="..\GME\$(var.lib)\xerces-c_3_2Win32.dll" />
+        <?else?>
+          <File Id="xerces_c_3_2.dll$(sys.BUILDARCH)" KeyPath="yes" Source="..\GME\$(var.lib)\xerces-c_3_2x64.dll" />
+        <?endif?>
+     </Component>
 
       <?if $(sys.BUILDARCH)=x86 ?>
       <Component Id="ssleay32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
