@@ -62,9 +62,9 @@ public:
 	void	Uninitialize(void);
 
 	Gdiplus::Pen* GetGdipPen2(Gdiplus::Graphics* gdip, COLORREF color, GMEConnLineType lineType = GME_LINE_SOLID,
-							  bool isViewMagnified = false, int width = 1);
+							  int width = 1);
 	Gdiplus::Pen* GetGdipPen(Gdiplus::Graphics* gdip, COLORREF color, bool isPrinting, GMEConnLineType lineType = GME_LINE_SOLID,
-							 bool isViewMagnified = false, int width = 1);
+							 int width = 1);
 	Gdiplus::SolidBrush* GetGdipBrush(COLORREF color);
 	Gdiplus::Font* GetGdipFont(GMEFontKind kind);
 	Gdiplus::Font* GetGdipFont(int kindsize, bool bold = false, bool semibold = false);
@@ -72,7 +72,7 @@ public:
 	void CreateFonts(CFont** font, Gdiplus::Font** gdipFont, int boldness);
 	void DrawGrid(Gdiplus::Graphics* gdip, int xSpace, int ySpace, int maxx, int maxy, COLORREF color = GME_GRID_COLOR);
 	void DrawConnection(Gdiplus::Graphics* gdip, const CPointList& points, const std::vector<long>& customizedEdgeIndexes,
-						COLORREF color, GMEConnLineType lineType, int srcEnd, int dstEnd, bool isViewMagnified,
+						COLORREF color, GMEConnLineType lineType, int srcEnd, int dstEnd,
 						bool drawBullets, int width = 1);
 	void DrawArrow(Gdiplus::Graphics* gdip, Gdiplus::Pen* pen, Gdiplus::Brush* brush,
 				   const CPoint& beforeLast, const CPoint& last, int iEnd, bool bold);

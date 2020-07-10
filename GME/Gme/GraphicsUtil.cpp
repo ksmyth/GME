@@ -272,20 +272,20 @@ Gdiplus::Font* CGraphics::GetGdipFont(int kindsize, bool bold, bool semibold)
 }
 
 Gdiplus::Pen* CGraphics::GetGdipPen2(Gdiplus::Graphics* gdip, COLORREF color, GMEConnLineType lineType,
-									 bool isViewMagnified, int width)
+									 int width)
 {
 	// TODO
 //	HDC hDC = gdip->GetHDC();
 //	bool isPrinting = GetDeviceCaps(hDC, TECHNOLOGY) == DT_RASPRINTER;
 //	gdip->ReleaseHDC(hDC);
-	return GetGdipPen(gdip, color, /*isPrinting*/ false, lineType, isViewMagnified, width);
+	return GetGdipPen(gdip, color, /*isPrinting*/ false, lineType, width);
 }
 
 Gdiplus::Pen* CGraphics::GetGdipPen(Gdiplus::Graphics* gdip, COLORREF color, bool isPrinting, GMEConnLineType lineType,
-									bool isViewMagnified, int width)
+									int width)
 {
 	CString chBuffer;
-	chBuffer.Format(_T("%x-%d-%d-%d-%ld"), color, isPrinting, lineType, isViewMagnified, width);
+	chBuffer.Format(_T("%x-%d-%d-%ld"), color, isPrinting, lineType, width);
 	std::map<CString,Gdiplus::Pen*>::iterator it = m_mapGdipPens.find(chBuffer);
 	if (it != m_mapGdipPens.end())
 		return it->second;
@@ -335,7 +335,7 @@ void CGraphics::DrawGrid(Gdiplus::Graphics* gdip, int xSpace, int ySpace, int ma
 typedef std::pair<long,long> Long_Pair;
 
 void CGraphics::DrawConnection(Gdiplus::Graphics* gdip, const CPointList& points, const std::vector<long>& customizedEdgeIndexes,
-							   COLORREF color, GMEConnLineType lineType, int srcEnd, int dstEnd, bool isViewMagnified,
+							   COLORREF color, GMEConnLineType lineType, int srcEnd, int dstEnd,
 							   bool drawBullets, int width)
 {
 	if (points.GetCount() == 0)
@@ -381,9 +381,9 @@ void CGraphics::DrawConnection(Gdiplus::Graphics* gdip, const CPointList& points
 				Gdiplus::Pen* pen;
 				indIter = customizedIndexes.find(currEdgeIndex);
 				if (indIter != customizedIndexes.end()) {
-					pen = GetGdipPen(gdip, color, isPrinting, GME_LINE_CUSTOMIZED, isViewMagnified, width);
+					pen = GetGdipPen(gdip, color, isPrinting, GME_LINE_CUSTOMIZED, width);
 				} else {
-					pen = GetGdipPen(gdip, color, isPrinting, lineType, isViewMagnified, width);
+					pen = GetGdipPen(gdip, color, isPrinting, lineType, width);
 				}
 				gdip->DrawLine(pen, last.x, last.y, pt.x, pt.y);
 				if (drawBullets && currEdgeIndex < numEdges - 1) {
@@ -404,7 +404,7 @@ void CGraphics::DrawConnection(Gdiplus::Graphics* gdip, const CPointList& points
 			CPoint pt = points.GetNext(pos);
 			gpoints.push_back(Point(pt.x, pt.y));
 		}
-		Pen* pen = GetGdipPen(gdip, color, isPrinting, lineType, isViewMagnified, width);
+		Pen* pen = GetGdipPen(gdip, color, isPrinting, lineType, width);
 		gdip->DrawLines(pen, &gpoints[0], gpoints.size()); // n.b. this is different than a sequence of DrawLine()s (GME-419)
 	}
 

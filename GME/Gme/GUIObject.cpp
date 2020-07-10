@@ -2701,7 +2701,7 @@ void CGuiConnection::Draw(HDC pDC, Gdiplus::Graphics* gdip)
 		width = (int)((float)((ZOOM_NO - 25) / max(10, view->m_zoomVal) + 0.2) * width + 0.5f);
 	}
 	graphics.DrawConnection(gdip, points, customizedEdgeIndexes, grayedOut ? GME_GRAYED_OUT_COLOR : color,
-							lineType, srcStyle, dstStyle, view->m_zoomVal > ZOOM_NO, !IsAutoRouted() && selected,
+							lineType, srcStyle, dstStyle, !IsAutoRouted() && selected,
 							width);
 
 	if (points.GetSize() < 2) {
