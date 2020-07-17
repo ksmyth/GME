@@ -47,7 +47,10 @@ STDMETHODIMP CScriptHost::InitEngine(IDispatch* console, BSTR engineProgid)
 		}
 		COMTHROW(m_iscript->SetScriptState(SCRIPTSTATE_CONNECTED));
 	}
-	COMCATCH(;)
+	COMCATCH(
+		// initialization failed; be sure to retry next time
+		m_enginePID.Assign(nullptr);
+	)
 
 	return S_OK;
 }
