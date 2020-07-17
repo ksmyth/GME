@@ -367,6 +367,7 @@ public:
 	bool					CheckBeforeDeleteObjects(CGuiObjectList& objectList, CString& txt);
 	void					ZoomOut(CPoint point);
 	void					ZoomIn(CPoint point);
+	void					ZoomToPoint(int scale, int newScale, CPoint point);
 	void					ZoomRect(CRect srect);
 	void					ZoomToFCOs(CRect rect);
 	void					ShowRegistryBrowser(CComPtr<IMgaFCO> fco);

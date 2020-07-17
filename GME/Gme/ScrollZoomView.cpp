@@ -109,7 +109,13 @@ void CScrollZoomView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 	case MM_ISOTROPIC:
 		pDC->SetMapMode(m_nMapMode);
 		pDC->SetWindowExt(100,100);
-		pDC->SetViewportExt(m_scalePercent, m_scalePercent);
+
+		{
+			int size = MulDiv(m_scalePercent, CClientDC(this).GetDeviceCaps(LOGPIXELSY), 96.0);
+
+
+			pDC->SetViewportExt(size, size);
+		}
 		break;
 	default:
 		ASSERT(m_nMapMode > 0);
@@ -139,7 +145,7 @@ void CScrollZoomView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 				ptVpOrg.y = (rect.Height() - m_totalDev.cy) / 2;
 		}
 	}
-	pDC->SetViewportOrg(ptVpOrg); 
+	pDC->SetViewportOrg(ptVpOrg);
 
 	CView::OnPrepareDC(pDC, pInfo);     // For default Printing behavior
 }
@@ -203,6 +209,11 @@ void CScrollZoomView::SetScrollSizes(int nMapMode, SIZE sizeTotal, int scalePerc
 		if (m_nMapMode == MM_ISOTROPIC) {
 			dc.SetWindowExt(100,100);
 			dc.SetViewportExt(scalePercent, scalePercent);
+
+			int size = MulDiv(m_scalePercent, CClientDC(const_cast<CScrollZoomView*>(this)).GetDeviceCaps(LOGPIXELSY), 96.0);
+
+			dc.SetViewportExt(size, size);
+
 		}
 
 		// total size
@@ -267,6 +278,10 @@ CPoint CScrollZoomView::GetScrollPosition() const   // logical coordinates
 		if (m_nMapMode == MM_ISOTROPIC) {
 			dc.SetWindowExt(100,100);
 			dc.SetViewportExt(m_scalePercent, m_scalePercent);
+
+			int size = MulDiv(m_scalePercent, CClientDC(const_cast<CScrollZoomView*>(this)).GetDeviceCaps(LOGPIXELSY), 96.0);
+
+			dc.SetViewportExt(size, size);
 		}
 		dc.DPtoLP((LPPOINT)&pt);
 	}
@@ -283,6 +298,10 @@ void CScrollZoomView::ScrollToPosition(POINT pt)    // logical coordinates
 		if (m_nMapMode == MM_ISOTROPIC) {
 			dc.SetWindowExt(100,100);
 			dc.SetViewportExt(m_scalePercent, m_scalePercent);
+
+			int size = MulDiv(m_scalePercent, CClientDC(const_cast<CScrollZoomView*>(this)).GetDeviceCaps(LOGPIXELSY), 96.0);
+
+			dc.SetViewportExt(size, size);
 		}
 		dc.LPtoDP((LPPOINT)&pt);
 	}
@@ -366,6 +385,12 @@ void CScrollZoomView::notifyPanning(CPoint pt)
 	dc.SetMapMode(MM_ISOTROPIC);
 	dc.SetWindowExt(100,100);
 	dc.SetViewportExt(m_scalePercent, m_scalePercent);
+
+	int size = MulDiv(m_scalePercent, CClientDC(const_cast<CScrollZoomView*>(this)).GetDeviceCaps(LOGPIXELSY), 96.0);
+
+	dc.SetViewportExt(size, size);
+
+
 	dc.DPtoLP((LPPOINT)&pt);
 	dc.DPtoLP(&client);
 	CRect pannw(pt.x, pt.y, pt.x + client.Width(), pt.y + client.Height());
