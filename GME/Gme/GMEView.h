@@ -199,6 +199,7 @@ public:
 
 	bool					isType;
 	bool					isSubType;
+	bool					isLibObject;
 	CString					name;
 	CString					kindName;
 	CString					kindDisplayedName;
