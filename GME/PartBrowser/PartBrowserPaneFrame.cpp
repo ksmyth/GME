@@ -19,8 +19,7 @@ static char THIS_FILE[] = __FILE__;
 CPartBrowserPaneFrame::CPartBrowserPaneFrame(CWnd* pParent/* = NULL*/)
 	: CDialog(CPartBrowserPaneFrame::IDD, pParent),
 	vScrollWidth (::GetSystemMetrics (SM_CXVSCROLL)),	// WinXP default style: 17
-	lineSize (20),
-	pageSize (60),
+	pageSize(60),
     pageHeight(100), // maybe fix UNINITIALIZED READ: reading register edx PartBrowser.OCX!CPartBrowserPaneFrame::Resize [c:\users\kevin\documents\gme\gme\partbrowser\partbrowserpaneframe.cpp:57]
     logicalHeight(100),
     scrollPos(0)
@@ -28,6 +27,11 @@ CPartBrowserPaneFrame::CPartBrowserPaneFrame(CWnd* pParent/* = NULL*/)
 	//{{AFX_DATA_INIT(CPartBrowserPaneFrame)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
+	HDC hdc = ::GetDC(NULL);
+	int logPixelsY = GetDeviceCaps(hdc, LOGPIXELSY);
+	::ReleaseDC(NULL, hdc);
+
+	lineSize = MulDiv(30, logPixelsY, 96);
 }
 
 

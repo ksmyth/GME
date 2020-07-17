@@ -38,6 +38,9 @@ CPartBrowserPane::CPartBrowserPane():
 	txtMetricFont.CreateFont(fontSizes[GME_NAME_FONT], 0, 0, 0, FW_NORMAL, false, 0, 0, ANSI_CHARSET,
 							 OUT_DEVICE_PRECIS, CLIP_DEFAULT_PRECIS,
 							 PROOF_QUALITY, FF_SWISS, _T("Arial"));
+	HDC hdc = ::GetDC(NULL);
+	logPixelsY = GetDeviceCaps(hdc, LOGPIXELSY);
+	::ReleaseDC(NULL, hdc);
 }
 
 CPartBrowserPane::~CPartBrowserPane()
@@ -93,11 +96,6 @@ bool CPartBrowserPane::FindObject(CPoint &pt, const PartWithDecorator*& pdt)
 			CRect rc (x1, y1, x2, y2);
 			if (rc.PtInRect(pt)) {
 				pdt = &(*ii);
-
-				long sizeX = 0;
-				long sizeY = 0;
-				COMTHROW((*ii).decorator->GetPreferredSize(&sizeX, &sizeY));
-
 				return true;
 			}
 		}
@@ -203,6 +201,11 @@ void CPartBrowserPane::Resize(CRect r)
 	if (!mgaMetaModel || currentAspectIndex < 0 || pdts.size() <= 0 || currentAspectIndex >= (int)pdts.size())
 		return;
 
+	r.bottom = MulDiv(r.bottom, 96, logPixelsY);
+	r.top = MulDiv(r.top, 96, logPixelsY);
+	r.left = MulDiv(r.left, 96, logPixelsY);
+	r.right = MulDiv(r.right, 96, logPixelsY);
+
 	bool oldOmitPaintMessages = omitPaintMessages;
 	omitPaintMessages = true;
 	ChangeAspect(currentAspectIndex);
@@ -292,8 +295,8 @@ void CPartBrowserPane::Resize(CRect r)
 	CPartBrowserPaneFrame* parent = (CPartBrowserPaneFrame*)GetParent();
 	ASSERT(parent != NULL);
 
-	parent->SetLogicalHeight(pt.y);
-	parent->SetPageHeight(r.Height());
+	parent->SetLogicalHeight(MulDiv(pt.y, logPixelsY, 96));
+	parent->SetPageHeight(MulDiv(r.Height(), logPixelsY, 96));
 	parent->SetScrollBar();
 
 	Invalidate();
@@ -393,6 +396,7 @@ void CPartBrowserPane::ChangeAspect(int index)
 
 	CPartBrowserPaneFrame* parent = (CPartBrowserPaneFrame*)GetParent();
 	ASSERT(parent != NULL);
+	ASSERT(dynamic_cast<CPartBrowserPaneFrame*>(GetParent()));
 
 	Invalidate();
 
@@ -424,7 +428,14 @@ void CPartBrowserPane::OnPaint()
 	ASSERT(parent != NULL);
 
 	CPaintDC dc(this); // device context for painting
-	dc.SetWindowOrg(0, parent->GetScrollPosition ());
+
+	dc.SetWindowOrg(0, MulDiv(parent->GetScrollPosition(), 96, logPixelsY));
+
+	dc.SetMapMode(MM_ISOTROPIC);
+	dc.SetWindowExt(100, 100);
+	int curzoom = MulDiv(100, logPixelsY, 96);
+	dc.SetViewportExt(curzoom, curzoom);
+
 
 	if (pdts.size() > 0 && currentAspectIndex >= 0) {
 		try {
@@ -472,6 +483,9 @@ void CPartBrowserPane::OnLButtonDown(UINT nFlags, CPoint point)
 	point.y += parent->GetScrollPosition ();
 
 	const PartWithDecorator* pdt;
+
+	point.x = MulDiv(point.x, 96, logPixelsY);
+	point.y = MulDiv(point.y, 96, logPixelsY);
 	bool found = FindObject(point, pdt);
 
 	if (found) {
