@@ -633,17 +633,25 @@ void __stdcall InvalidArgReplacement() {
 
 static void HookInvalidArg() {
 #if defined(_M_IX86)
+	/*
+	End state:
+	0:018> u mfc140u!AfxThrowInvalidArgException
+	mfc140u!AfxThrowInvalidArgException:
+	7bf38bc0 e91b944e84      jmp     GME!InvalidArgReplacement (00421fe0)
+	*/
 	// reg add HKCU\Software\GME /v HookInvalidArg /d 1 /t REG_SZ /f
 	if (getUserRegistryStringValue(L"HookInvalidArg") == L"1") {
 		InvalidArg = &AfxThrowInvalidArgException;
 		int** invalidArg = (int**)(2 + ((char*)(void*)InvalidArg));
+		// **invalidArg == mfc140u!AfxThrowInvalidArgException
 		DWORD oldProtect;
 		if (VirtualProtect((LPVOID)**invalidArg, 5, PAGE_EXECUTE_READWRITE, &oldProtect)) {
 			int invalidArgHook = (int)(void*)&InvalidArgReplacement;
 			ptrdiff_t diff = invalidArgHook - **invalidArg;
-			diff -= 5;
-			*((char*)**invalidArg) = 0xe9;
-			*((int*)(1 + (char*)**invalidArg)) = diff;
+			char relative_jmp = 0xe9;
+			diff -= sizeof(relative_jmp) + sizeof(diff);
+			*((char*)**invalidArg) = relative_jmp;
+			*((int*)(sizeof(relative_jmp) + (char*)**invalidArg)) = diff;
 			// AfxThrowInvalidArgException();
 		}
 	}

@@ -1,5 +1,5 @@
               Generic Modeling Environment
-       Copyright © 2000-2020 Vanderbilt University
+       Copyright © 2000-2021 Vanderbilt University
 
 
 ************************************************
@@ -25,10 +25,11 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
-Release Notes
+Release Notes of Release 21.4.1
 ----------------------------------
   - Binary compatibility with 11.12.2
-  - Fix bug where 'Do you want to save?' dialog appears too often
+  - Fix bug where 'Do you want to save?' dialog appears when the project hasn't been modified
+  - Fix some high-DPI rendering issues
 
 Release Notes of Release 20.2.12
 ----------------------------------
