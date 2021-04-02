@@ -1454,7 +1454,7 @@ because we have used the Java/COM bridge from Microsoft.
 2. System Requirements
 ************************************************
 
-GME is supported on Windows XP, Vista, 7, and 8.
+GME is supported on Windows XP, Vista, 7, 8, and 10.
 GME does not work on Windows Server Core.
 
 ************************************************
