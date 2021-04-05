@@ -986,7 +986,7 @@ void CGMEView::OnDraw(CDC* pDC)
 				if (connSrcPort) {
 					rect = connSrcPort->GetLocation() + rect.TopLeft();
 				}
-				Gdiplus::Pen* xorPen = graphics.GetGdipPen2(&gdip, GME_DARKRED_COLOR, GME_LINE_SOLID, m_zoomVal > ZOOM_NO, GME_CONNSELECT_WIDTH);
+				Gdiplus::Pen* xorPen = graphics.GetGdipPen2(&gdip, GME_DARKRED_COLOR, GME_LINE_SOLID, GME_CONNSELECT_WIDTH);
 				pDC->DPtoLP(rect);
 				gdip.DrawRectangle(xorPen, rect.left - .5f, rect.top - .5f, (float)rect.Width(), (float)rect.Height());
 
@@ -1021,7 +1021,7 @@ void CGMEView::OnDraw(CDC* pDC)
 					rect = connTmpPort->GetLocation() + rect.TopLeft();
 				}
 				pDC->DPtoLP(rect);
-				Gdiplus::Pen* xorPen = graphics.GetGdipPen2(&gdip, GME_RED_COLOR, GME_LINE_SOLID, m_zoomVal > ZOOM_NO, GME_CONNSELECT_WIDTH);
+				Gdiplus::Pen* xorPen = graphics.GetGdipPen2(&gdip, GME_RED_COLOR, GME_LINE_SOLID, GME_CONNSELECT_WIDTH);
 				gdip.DrawRectangle(xorPen, rect.left - .5f, rect.top - .5f, (float) rect.Width(), (float) rect.Height());
 
 				if ((connTmpHotSide != GME_CENTER) && (!connTmpPort)) {
@@ -2754,7 +2754,7 @@ void CGMEView::DrawConnectionCustomizationTracker(CDC* pDC, Gdiplus::Graphics* g
 			DrawTracker(pDC, trackerRect, CRectTracker::dottedLine);
 		}
 	} else if (customizeConnectionType == CustomPointCustomization) {
-		Gdiplus::Pen* dashPen = graphics.GetGdipPen2(gdip, GME_BLACK_COLOR, GME_LINE_DASH, m_zoomVal > ZOOM_NO, 1);
+		Gdiplus::Pen* dashPen = graphics.GetGdipPen2(gdip, GME_BLACK_COLOR, GME_LINE_DASH, 1);
 		ASSERT(customizeConnectionEdgeStartPoint != emptyPoint);
 		if (customizeConnectionEdgeStartPoint != emptyPoint)
 			gdip->DrawLine(dashPen, customizeConnectionEdgeStartPoint.x, customizeConnectionEdgeStartPoint.y,
