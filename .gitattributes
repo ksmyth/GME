@@ -1,1 +1,2 @@
 *.rc diff encoding=cp1252
+**/*.md text whitespace=-cr-at-eol,-trailing-space
