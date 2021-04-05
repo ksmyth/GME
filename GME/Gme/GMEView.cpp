@@ -1109,6 +1109,10 @@ void CGMEView::OnInitialUpdate()
 
 		COMTHROW(currentModel->Open(OPEN_READ));
 		COMTHROW(currentModel->get_Name(PutOut(name)));
+		VARIANT_BOOL isLibObject = VARIANT_FALSE;
+		COMTHROW(currentModel->get_IsLibObject(&isLibObject));
+		this->isLibObject = isLibObject != VARIANT_FALSE;
+
 		CComPtr<IMgaMetaFCO> meta;
 		COMTHROW(currentModel->get_Meta(&meta));
 		COMTHROW(meta->get_Name(PutOut(kindName)));
@@ -5361,11 +5365,13 @@ void CGMEView::OnLButtonDown(UINT nFlags, CPoint point)
 
 					validGuiObjects = true;
 					dragSource = (selected.GetCount() > 0) ? selected.GetHead() : NULL;
-					DROPEFFECT dropEffect = CGMEDoc::DoDragDrop(&selected, &selectedAnnotations, &desc,
-						DROPEFFECT_MOVE | DROPEFFECT_COPY | DROPEFFECT_LINK, &rectAwake,this);
-
+					DROPEFFECT dropEffect = DROPEFFECT_NONE;
+					if (!isLibObject) {
+						dropEffect = CGMEDoc::DoDragDrop(&selected, &selectedAnnotations, &desc,
+							DROPEFFECT_MOVE | DROPEFFECT_COPY | DROPEFFECT_LINK, &rectAwake, this);
+					}
 					if (validGuiObjects && dropEffect == DROPEFFECT_NONE) {
-						if (inDrag && alreadySelected != NULL && (selection || annotation)) {
+						if (!isLibObject && inDrag && alreadySelected != NULL && (selection || annotation)) {
 							OnLButtonUp(nFlags, ppoint);
 						}
 						if (nFlags & MK_CONTROL) {
@@ -5413,7 +5419,7 @@ void CGMEView::OnLButtonDown(UINT nFlags, CPoint point)
 						}
 						doNotDeselectAfterInPlaceEdit = false;
 					}
-					else {
+					else if (!isLibObject) {
 						ChangeAttrPrefObjs(selected);
 					}
 					Invalidate();
@@ -5925,7 +5931,7 @@ void CGMEView::OnRButtonDown(UINT nFlags, CPoint point)
 	CPoint ppoint = point;
 	CoordinateTransfer(point);
 
-	if(!tmpConnectMode) {
+	if(!tmpConnectMode && !isLibObject) {
 		CGMEDoc *doc = GetDocument();
 		if(doc->GetEditMode() == GME_EDIT_MODE)
 		{
