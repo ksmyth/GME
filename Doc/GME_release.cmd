@@ -2,6 +2,7 @@ Setlocal EnableDelayedExpansion
 
 set PATH=c:\Program Files\Git\usr\bin;%PATH%;c:\Program Files\7-Zip;c:\cygwin\bin;C:\Program Files (x86)\Subversion\bin
 if not exist "%PYTHON%" set PYTHON=%userprofile%\Downloads\markdown\Scripts\python.exe
+if not exist "%PYTHON_x64%" set PYTHON_x64=c:\Python27-64\python.exe
 
 rem where "%PYTHON%" || exit /b !ERRORLEVEL!
 rem pip install pywin32
