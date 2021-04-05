@@ -54,6 +54,64 @@
 CGraphics graphics;
 static CViewList viewsToKill;
 
+class CRectTrackerDpi : public CRectTracker {
+public:
+	void Draw(CDC* pDC) const
+{
+	// set initial DC state
+	VERIFY(pDC->SaveDC() != 0);
+	pDC->SetMapMode(MM_TEXT);
+	pDC->SetViewportOrg(0, 0);
+	pDC->SetWindowOrg(0, 0);
+
+	// get normalized rectangle
+	CRect rect = m_rect;
+	rect.NormalizeRect();
+	int yRes = ::GetDeviceCaps(*pDC, LOGPIXELSY);
+
+	CPen* pOldPen = NULL;
+	CBrush* pOldBrush = NULL;
+	CGdiObject* pTemp;
+	int nOldROP;
+
+	// draw lines
+	// FIXME support dottedLine again
+	if ((m_nStyle & (dottedLine | solidLine)) != 0)
+	{
+		pOldPen = (CPen*)pDC->SelectStockObject(BLACK_PEN);
+		pOldBrush = (CBrush*)pDC->SelectStockObject(NULL_BRUSH);
+		nOldROP = pDC->SetROP2(R2_COPYPEN);
+		rect.InflateRect(+1, +1);   // borders are one pixel outside
+		for (int i = 0; i < (yRes + 95) / 96; i++) {
+			pDC->Rectangle(rect.left, rect.top, rect.right, rect.bottom);
+			rect.InflateRect(+1, +1);
+		}
+		pDC->SetROP2(nOldROP);
+	}
+
+	// draw resize handles
+	if ((m_nStyle & (resizeInside | resizeOutside)) != 0)
+	{
+		UINT mask = GetHandleMask();
+		for (int i = 0; i < 8; ++i)
+		{
+			if (mask & (1 << i))
+			{
+				GetHandleRect((TrackerHit)i, &rect);
+				pDC->FillSolidRect(rect, RGB(0, 0, 0));
+			}
+		}
+	}
+
+	// cleanup pDC state
+	if (pOldPen != NULL)
+		pDC->SelectObject(pOldPen);
+	if (pOldBrush != NULL)
+		pDC->SelectObject(pOldBrush);
+	VERIFY(pDC->RestoreDC(-1));
+}
+};
+
 // CSGUIInterop.cpp
 void MoveReferenceWithRefportConnectionsAndWriteToConsole(IMgaFCO* target, IMgaReference* ref);
 
@@ -907,6 +965,8 @@ void CGMEView::OnDraw(CDC* pDC)
 			GetClientRect(clientRect);
 			CPoint clientSize = clientRect.Size();
 			CPoint scrollpos = GetDeviceScrollPosition();
+			scrollpos.x = MulDiv(scrollpos.x, 96, CClientDC(this).GetDeviceCaps(LOGPIXELSY));
+			scrollpos.y = MulDiv(scrollpos.y, 96, CClientDC(this).GetDeviceCaps(LOGPIXELSY));
 			visible = CRect(scrollpos, scrollpos + clientSize);
 			visible.InflateRect(10 * 100 / m_scalePercent, 10 * 100 / m_scalePercent);
 			visible = CRect(std::max(0l, visible.left), std::max(0l, visible.top),
@@ -950,7 +1010,7 @@ void CGMEView::OnDraw(CDC* pDC)
 			if( ( (selected.GetCount() > 0) || (selectedAnnotations.GetCount() > 0) ) 
 						&& !pDC->IsPrinting() && !IsPreview()) {
 				POSITION pos = selected.GetHeadPosition();
-				CRectTracker tracker;
+				CRectTrackerDpi tracker;
 				OnPrepareDC(pDC);	// It's needed somehow, in spite of previous OnPrepareDC
 				CGuiObject *obj;
 				while(pos) {
@@ -2592,7 +2652,7 @@ void CGMEView::SetZoomPoint(int curzoom, CPoint point)
 	offset.y /= 2;
 
 	CPoint scp = GetScrollPosition();       // upper corner of scrolling
-	m_zoomP = scp+point-offset;
+	m_zoomP = scp + point - offset;
 
 	m_zoomScroll = true;
 }
@@ -2602,29 +2662,20 @@ void CGMEView::ZoomIn(CPoint point)
 	CGMEEventLogger::LogGMEEvent(_T("CGMEView::ZoomIn() in ")+path+name+_T("\r\n"));
 //	zoomIdx = min(GME_ZOOM_LEVEL_NUM-1, zoomIdx+1);
 	int curzoom = m_zoomVal;
-	frame->propBar.NextZoomVal(m_zoomVal);
-//	CMainFrame::theInstance->WriteStatusZoom(setZoomPercents[zoomIdx]);
-	CMainFrame::theInstance->WriteStatusZoom(m_zoomVal);
+	int newScale;
+	frame->propBar.NextZoomVal(newScale);
 	m_zoomP.x = m_zoomP.y = 0;
-	if (curzoom == m_zoomVal)
-		return;
-
-	SetZoomPoint(curzoom, point);
+	ZoomToPoint(curzoom, newScale, point);
 }
 
 void CGMEView::ZoomOut(CPoint point)
 {
 	CGMEEventLogger::LogGMEEvent(_T("CGMEView::ZoomOut() in ")+path+name+_T("\r\n"));
-//	zoomIdx = max(0, zoomIdx-1);
 	int curzoom = m_zoomVal;
-	frame->propBar.PrevZoomVal(m_zoomVal);
-//	CMainFrame::theInstance->WriteStatusZoom(setZoomPercents[zoomIdx]);
-	CMainFrame::theInstance->WriteStatusZoom(m_zoomVal);
+	int newScale;
+	frame->propBar.PrevZoomVal(newScale);
 	m_zoomP.x = m_zoomP.y = 0;
-	if (curzoom == m_zoomVal)
-		return;
-
-	SetZoomPoint(curzoom, point);
+	ZoomToPoint(curzoom, newScale, point);
 }
 
 void CGMEView::ShowHelp(CComPtr<IMgaFCO> fco)
@@ -2973,7 +3024,7 @@ void CGMEView::SetScroll()
 //	s.cy = s.cy + END_SCROLL_OFFSET;
 
 //	if (setZoomPercents[zoomIdx] == 100) {
-	if (m_zoomVal == ZOOM_NO) {
+	if (false && m_zoomVal == ZOOM_NO) {
 		SetScrollSizes(MM_TEXT,s, m_zoomVal); // setZoomPercents[zoomIdx]);
 	}
 	else {
@@ -5351,7 +5402,7 @@ void CGMEView::OnLButtonDown(UINT nFlags, CPoint point)
 					CPoint ptClickOffset(point.x - dragRect.left,
 											point.y - dragRect.top);
 					CRect rectAwake = CRect(trackPoint.x,trackPoint.y,trackPoint.x + 1,trackPoint.y + 1);
-					rectAwake.InflateRect(3,3);
+					rectAwake.InflateRect(GetSystemMetrics(SM_CXDRAG), GetSystemMetrics(SM_CYDRAG));
 					ClientToScreen(&dragRect);
 					ClientToScreen(&rectAwake);
 
@@ -5612,8 +5663,9 @@ void CGMEView::OnLButtonDown(UINT nFlags, CPoint point)
 					truerect.NormalizeRect();
 					if (truerect.Height() <= MIN_ZOOM_RECT && truerect.Width() <= MIN_ZOOM_RECT)
 						ZoomIn(ppoint); 
-					else
+					else {
 						ZoomRect(truerect);
+					}
                 }
 				else
 					ZoomIn(ppoint); 
@@ -5956,7 +6008,8 @@ void CGMEView::OnRButtonDown(UINT nFlags, CPoint point)
 				CPoint ptClickOffset(point.x - dragRect.left,
 										point.y - dragRect.top);
 				CRect rectAwake = CRect(trackPoint.x,trackPoint.y,trackPoint.x + 1,trackPoint.y + 1);
-				rectAwake.InflateRect(3,3);
+				rectAwake.InflateRect(GetSystemMetrics(SM_CXDRAG), GetSystemMetrics(SM_CYDRAG));
+
 				ClientToScreen(&dragRect);
 				ClientToScreen(&rectAwake);
 
@@ -5970,7 +6023,7 @@ void CGMEView::OnRButtonDown(UINT nFlags, CPoint point)
 				dragSource = (selected.GetCount() > 0) ? selected.GetHead() : NULL;
 				validGuiObjects = true;
 				DROPEFFECT dropEffect = CGMEDoc::DoDragDrop(&selected, &selectedAnnotations, &desc,
-													DROPEFFECT_MOVE | DROPEFFECT_COPY | DROPEFFECT_LINK, &rectAwake,this);
+						DROPEFFECT_MOVE | DROPEFFECT_COPY | DROPEFFECT_LINK, &rectAwake, this);
 				if (validGuiObjects && dropEffect == DROPEFFECT_NONE) {
 					OnRButtonUp(nFlags, trackPoint);
 				}
@@ -6268,6 +6321,41 @@ void CGMEView::OnRButtonUp(UINT nFlags, CPoint point)
 	this->SendNow();
 }
 
+void CGMEView::ZoomToPoint(int scale, int newScale, CPoint point)
+{
+	if (scale != newScale)
+	{
+		int yRes = CClientDC(this).GetDeviceCaps(LOGPIXELSY);
+		// goal: zoom in and move scrollbars such that the mouse is over the same spot in the grid (logical coords)
+		//  (sometimes this cannot be acheived due to scrollbar limits, especially at low zooms)
+		CPoint scp = GetScrollPosition(); // upper corner of scrolling (logical coords)
+
+		CPoint scaledPoint = point;
+		//  scaledPoint /= scale / 100.0f;
+		//  scaledPoint /= yRes / 96
+		scaledPoint.x = ::MulDiv(scaledPoint.x, 100 * 96, scale * yRes);
+		scaledPoint.y = ::MulDiv(scaledPoint.y, 100 * 96, scale * yRes);
+
+		// now scp + scaledPoint == mouse coords (logical). Translate using new zoom back to mouse coords
+		//  scaledPoint -= point / (zoom * (scale / 100.0f));
+		//  scaledPoint -= point / (yRes / 96);
+		scaledPoint.x -= ::MulDiv(point.x, 100 * 96, newScale * yRes);
+		scaledPoint.y -= ::MulDiv(point.y, 100 * 96, newScale * yRes);
+
+		SetRedraw(FALSE); // Reduce flicker: OnZoom sets scrollbar position, and Windows redraws it before we can ScrollToPosition
+		OnZoom(0, newScale);
+		ScrollToPosition(scp + scaledPoint);
+
+		frame->propBar.SetZoomVal(m_zoomVal);
+		CMainFrame::theInstance->WriteStatusZoom(m_zoomVal);
+
+		SetRedraw(TRUE);
+		Invalidate();
+	}
+
+}
+
+
 BOOL CGMEView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 {
 	// handle zoom in/out
@@ -6277,39 +6365,15 @@ BOOL CGMEView::OnMouseWheel(UINT fFlags, short zDelta, CPoint point)
 
 		int scale = m_zoomVal;
 		float zoom = pow((float)1 + (float)abs(nToScroll)/8, nToScroll > 0 ? 1 : -1);
-		int newScale = scale * zoom; // + 0.49999997f;
+		int newScale = scale * zoom + 0.49999997f;
 		newScale = max(ZOOM_MIN, min(ZOOM_MAX, newScale));
 		if (abs((float)newScale - 100) < 8) // TODO: implement fixup for more values?
 		{
 			newScale = 100;
 			zoom = (float) newScale / scale;
 		}
-		if (scale != newScale)
-		{
-			// goal: zoom in and move scrollbars such that the mouse is over the same spot in the grid (logical coords)
-			//  (sometimes this cannot be acheived due to scrollbar limits, especially at low zooms)
-			this->ScreenToClient(&point);
-			CPoint scp = GetScrollPosition(); // upper corner of scrolling (logical coords)
-
-			CPoint scaledPoint = point;
-			//  scaledPoint /= scale / 100.0f;
-			scaledPoint.x = ::MulDiv(scaledPoint.x, 100, scale);
-			scaledPoint.y = ::MulDiv(scaledPoint.y, 100, scale);
-			// now scp + scaledPoint == mouse coords (logical). Translate using new zoom back to mouse coords
-			//  scaledPoint -= point / (zoom * (scale / 100.0f));
-			scaledPoint.x -= ::MulDiv(point.x, 100, newScale);
-			scaledPoint.y -= ::MulDiv(point.y, 100, newScale);
-
-			SetRedraw(FALSE); // Reduce flicker: OnZoom sets scrollbar position, and Windows redraws it before we can ScrollToPosition
-			OnZoom(0, newScale);
-			ScrollToPosition(scp + scaledPoint);
-
-			frame->propBar.SetZoomVal(m_zoomVal);
-			CMainFrame::theInstance->WriteStatusZoom(m_zoomVal);
-
-			SetRedraw(TRUE);
-			Invalidate();
-		}
+		this->ScreenToClient(&point);
+		ZoomToPoint(scale, newScale, point);
 		return TRUE;
 	}
 
@@ -10420,8 +10484,13 @@ void CGMEView::ZoomRect(CRect srect)
 		return;
 
 	CPoint point = home;
-	point.x += orisize_srect.cx/2;
-	point.y += orisize_srect.cy/2;
+	int yRes = CClientDC(this).GetDeviceCaps(LOGPIXELSY);
+
+	point.x = MulDiv(point.x, 96, yRes);
+	point.y = MulDiv(point.y, 96, yRes);
+
+	point.x += orisize_srect.cx / 2;
+	point.y += orisize_srect.cy / 2;
 
 // prevous zoom value : curzoom
 // new zoom value stored in m_zoomVal
