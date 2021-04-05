@@ -624,7 +624,7 @@ HRESULT FCO::get_ObjectByPath(BSTR path, IMgaObject ** pVal) {
 			if (relpos_b.Length())
 			{
 				if (swscanf(static_cast<const wchar_t*>(relpos_b), L"%d", &relpos) != 1)
-					return E_INVALIDARG;
+					COMTHROW(E_INVALIDARG);
 			}
 
 			bool found = false;
@@ -813,7 +813,7 @@ HRESULT FCO::get_NthObjectByPath(long n_th, BSTR path, IMgaObject ** pVal) {
 
 			int relpos;
 			if (sscanf( relpos_str.c_str(), "%d", &relpos) != 1)
-				return E_INVALIDARG;
+				COMTHROW(E_INVALIDARG);
 
 			// take from the samename_objs map the element at relpos relative position
 			std::map< objid_type, std::vector<CoreObj> >::iterator ii = samename_objs.begin();
