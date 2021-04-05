@@ -42,7 +42,7 @@ protected:
 	int pageHeight;
 	int scrollPos;
 	const int vScrollWidth;
-	const int lineSize;
+	int lineSize;
 	const int pageSize;
 
 public:

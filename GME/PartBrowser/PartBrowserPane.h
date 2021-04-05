@@ -64,6 +64,16 @@ private:
 	bool		FindObject(CPoint &pt, const PartWithDecorator*& pdt);
 	void		CreateDecorators(CComPtr<IMgaMetaParts> metaParts);
 	void		DestroyDecorators(void);
+	int logPixelsY;
+	HRESULT GetDecoratorSize(IMgaDecorator* decorator, long &sizeX, long &sizeY) {
+		HRESULT hr = decorator->GetPreferredSize(&sizeX, &sizeY);
+		sizeX = MulDiv(sizeX, logPixelsY, 96);
+		sizeY = MulDiv(sizeX, logPixelsY, 96);
+		return hr;
+	}
+	HRESULT GetDecoratorSize(const PartWithDecorator& decorator, long &sizeX, long &sizeY) {
+		return GetDecoratorSize(decorator.decorator, sizeX, sizeY);
+	}
 
 // Attributes
 protected:
