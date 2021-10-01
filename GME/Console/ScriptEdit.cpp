@@ -47,7 +47,7 @@ bool CScriptEdit::Init(CConsoleCtrl *cons)
 	catch(hresult_exception &e) 
 	{ 
 		TCHAR s[200];
-		_stprintf_s(s, _T("Scripting Initialization Error: 0x%x"), e.hr);
+		_stprintf_s(s, _T("Scripting Initialization Error: 0x%x"), (unsigned int)e.hr);
 		m_console->Message(s, MSG_ERROR);
 		_ftprintf(stderr, _T("%s"), s);
 		return false;
@@ -176,14 +176,14 @@ void CScriptEdit::SetGMEApp(IDispatch *disp)
 	catch(hresult_exception &e) 
 	{ 
 		TCHAR s[1000];
-		_stprintf_s(s, _T("Scripting Error: 0x%x"), e.hr);
+		_stprintf_s(s, _T("Scripting Error: 0x%x"), (unsigned int)e.hr);
 		m_console->Message((LPCTSTR)s, MSG_ERROR);
 		_ftprintf(stderr, _T("%s"), s);
 	}
 	catch(_com_error &e) 
 	{ 
 		TCHAR s[1000];
-		_stprintf_s(s, _T("Scripting Error: 0x%x"), e.Error());
+		_stprintf_s(s, _T("Scripting Error: 0x%x"), (unsigned int)e.Error());
 		m_console->Message(s, MSG_ERROR);
 		_ftprintf(stderr, _T("%s"), s);
 	}
@@ -198,14 +198,14 @@ void CScriptEdit::SetGMEProj(IDispatch *disp)
 	catch(hresult_exception &e) 
 	{ 
 		TCHAR s[1000];
-		_stprintf_s(s, _T("Scripting Error: 0x%x"), e.hr);
+		_stprintf_s(s, _T("Scripting Error: 0x%x"), (unsigned int)e.hr);
 		m_console->Message(s, MSG_ERROR);
 		_ftprintf(stderr, _T("%s"), s);
 	}
 	catch(_com_error &e) 
 	{ 
 		TCHAR s[1000];
-		_stprintf_s(s, _T("Scripting Error: 0x%x"), e.Error());
+		_stprintf_s(s, _T("Scripting Error: 0x%x"), (unsigned int)e.Error());
 		m_console->Message(s, MSG_ERROR);
 		_ftprintf(stderr, _T("%s"), s);
 	}
@@ -250,13 +250,13 @@ void CScriptEdit::ExecuteScript( CString& p_str)
 	}
 	catch(hresult_exception& e) {
 		TCHAR s[1000];
-		_stprintf_s(s, _T("Scripting Error: 0x%x"), e.hr);
+		_stprintf_s(s, _T("Scripting Error: 0x%x"), (unsigned int)e.hr);
 		m_console->Message(s, MSG_ERROR);
 	}
 	catch(_com_error& e) {
 		TCHAR s[1000];
 		COMTHROW(e.Error());
-		_stprintf_s(s, _T("Execute Script Error: 0x%x"), e.Error());
+		_stprintf_s(s, _T("Execute Script Error: 0x%x"), (unsigned int)e.Error());
 		m_console->Message(s, MSG_ERROR);
 	}
 	catch(...) {

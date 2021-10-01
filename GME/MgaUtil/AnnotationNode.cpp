@@ -393,7 +393,7 @@ void CAnnotationNode::Read(CAnnotationBrowserDlg *dlg)
 			CComBSTR  rootVal;
 			COMTHROW(aspRoot->get_Value(&rootVal));
 			CString rootValStr(rootVal);
-			long lx, ly;
+			int lx, ly;
 			if(_stscanf(rootValStr,_T("%d,%d"), &lx, &ly) == 2) {
 				m_aspects[aspIdx].m_loc = CPoint(lx,ly);	
 			}
@@ -417,7 +417,7 @@ void CAnnotationNode::Read(CAnnotationBrowserDlg *dlg)
 				CComBSTR  aspVal;
 				COMTHROW(aspNode->get_Value(&aspVal));
 				CString aspValStr(aspVal);
-				long lx, ly;
+				int lx, ly;
 				if(_stscanf(aspValStr,_T("%d,%d"), &lx, &ly) == 2) {
 					m_aspects[aspIdx].m_loc = CPoint(lx,ly);
 					m_aspects[aspIdx].m_isLocDef = false;

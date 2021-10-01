@@ -609,7 +609,7 @@ void  CGuiAnnotator::ReadLocation(int aspect, CComPtr<IMgaRegNode>& aspNode)
 		COMTHROW(aspNode->get_Value(&bstr));
 		CString str(bstr);
 		long lx, ly;
-		if(_stscanf(str,_T("%d,%d"), &lx, &ly) == 2) {
+		if(_stscanf(str,_T("%ld,%ld"), &lx, &ly) == 2) {
 			decoratorData[aspect]->location.left = lx;
 			decoratorData[aspect]->location.top = ly;
 			return;
@@ -624,7 +624,7 @@ void  CGuiAnnotator::ReadLocation(int aspect, CComPtr<IMgaRegNode>& aspNode)
 		COMTHROW(rootNode->get_Value(&bstrRoot));
 		CString strRoot(bstrRoot);
 		long lxr, lyr;
-		if(_stscanf(strRoot,_T("%d,%d"), &lxr, &lyr) == 2) {
+		if(_stscanf(strRoot,_T("%ld,%ld"), &lxr, &lyr) == 2) {
 			decoratorData[aspect]->location.left = lxr;
 			decoratorData[aspect]->location.top = lyr;
 			return;

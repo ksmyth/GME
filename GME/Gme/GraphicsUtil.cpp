@@ -86,12 +86,12 @@ void CArrowHead::Draw(Gdiplus::Graphics* gdip, Gdiplus::Pen* pen, Gdiplus::Brush
 	{
 		if (dir == GME_LEFT_DIRECTION || dir == GME_RIGHT_DIRECTION)
 		{
-			Gdiplus::Matrix matrix(1.0f, 0.0f, 0.0f, 1.7f, 0, (Gdiplus::REAL)-lasty * (1.7 - 1));
+			Gdiplus::Matrix matrix(1.0f, 0.0f, 0.0f, 1.7f, 0, (Gdiplus::REAL)-lasty * (1.7f - 1));
 			arrowHeadPath.Transform(&matrix);
 		}
 		else
 		{
-			Gdiplus::Matrix matrix(1.7f, 0.0f, 0.0f, 1.0f, (Gdiplus::REAL)-lastx * (1.7 - 1), 0);
+			Gdiplus::Matrix matrix(1.7f, 0.0f, 0.0f, 1.0f, (Gdiplus::REAL)-lastx * (1.7f - 1), 0);
 			arrowHeadPath.Transform(&matrix);
 		}
 	}
@@ -284,8 +284,9 @@ Gdiplus::Pen* CGraphics::GetGdipPen2(Gdiplus::Graphics* gdip, COLORREF color, GM
 Gdiplus::Pen* CGraphics::GetGdipPen(Gdiplus::Graphics* gdip, COLORREF color, bool isPrinting, GMEConnLineType lineType,
 									int width)
 {
-	CString chBuffer;
-	chBuffer.Format(_T("%x-%d-%d-%ld"), color, isPrinting, lineType, width);
+	wchar_t buf[128];
+	_swprintf(buf, _T("%x-%d-%d-%d"), (unsigned int)color, isPrinting, lineType, width);
+	CString chBuffer = buf;
 	std::map<CString,Gdiplus::Pen*>::iterator it = m_mapGdipPens.find(chBuffer);
 	if (it != m_mapGdipPens.end())
 		return it->second;

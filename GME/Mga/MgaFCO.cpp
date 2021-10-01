@@ -177,7 +177,7 @@ HRESULT FCO::get_ID(ID_type *pVal) {
 		OLECHAR t[20];
 		objid_type ss;
 		COMTHROW(self->get_ObjID(&ss));
-		swprintf(t, 20, OLESTR("id-%04lx-%08lx"),GetMetaID(self), ss);
+		swprintf(t, 20, OLESTR("id-%04lx-%08lx"), (unsigned long)GetMetaID(self), ss);
 		*pVal = CComBSTR(t).Detach();
 	} COMCATCH(;);
 }

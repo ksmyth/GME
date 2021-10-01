@@ -9976,15 +9976,15 @@ bool CGMEView::IsLegalConnectionEnd(CGuiObject *connEnd, CGuiPort *port)
 
 	wchar_t srcPath[100];
 	if (srcPortMeta)
-		swprintf_s(srcPath, L"src %d %d, ", srcMeta->MetaRef, srcPortMeta->MetaRef);
+		swprintf_s(srcPath, L"src %ld %ld, ", srcMeta->MetaRef, srcPortMeta->MetaRef);
 	else
-		swprintf_s(srcPath, L"src %d, ", srcMeta->MetaRef);
+		swprintf_s(srcPath, L"src %ld, ", srcMeta->MetaRef);
 
 	wchar_t dstPath[100];
 	if (dstPortMeta)
-		swprintf_s(dstPath, L"dst %d %d", dstMeta->MetaRef, dstPortMeta->MetaRef);
+		swprintf_s(dstPath, L"dst %ld %ld", dstMeta->MetaRef, dstPortMeta->MetaRef);
 	else
-		swprintf_s(dstPath, L"dst %d", dstMeta->MetaRef);
+		swprintf_s(dstPath, L"dst %ld", dstMeta->MetaRef);
 
 	_bstr_t path = srcPath;
 	path += dstPath;
