@@ -102,4 +102,10 @@ typedef GMEInterfaceVersion_enum GMEInterfaceVersion;
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 
+#pragma warning( push )
+#pragma warning( disable : 4091 )
+#include "CrashRpt.h"
+#pragma warning( pop )
+
+
 #endif // !defined(AFX_STDAFX_H__BD235B4D_BD3F_11D3_91E2_00104B98EAD9__INCLUDED_)
