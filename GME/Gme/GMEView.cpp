@@ -60,9 +60,6 @@ public:
 {
 	// set initial DC state
 	VERIFY(pDC->SaveDC() != 0);
-	pDC->SetMapMode(MM_TEXT);
-	pDC->SetViewportOrg(0, 0);
-	pDC->SetWindowOrg(0, 0);
 
 	// get normalized rectangle
 	CRect rect = m_rect;
@@ -71,21 +68,25 @@ public:
 
 	CPen* pOldPen = NULL;
 	CBrush* pOldBrush = NULL;
-	CGdiObject* pTemp;
 	int nOldROP;
 
 	// draw lines
-	// FIXME support dottedLine again
+	CPen pen;
 	if ((m_nStyle & (dottedLine | solidLine)) != 0)
 	{
-		pOldPen = (CPen*)pDC->SelectStockObject(BLACK_PEN);
+		LOGBRUSH brush;
+		brush.lbStyle = BS_SOLID;
+		brush.lbColor = RGB(0, 0, 0);
+		brush.lbHatch = 0;
+		int width = MulDiv(1, yRes, 96);
+
+		pen.Attach(ExtCreatePen(PS_GEOMETRIC | ((m_nStyle & dottedLine) ? PS_DOT : PS_SOLID), width,
+			&brush, 0, nullptr));
+		pOldPen = (CPen*)pDC->SelectObject(pen);
 		pOldBrush = (CBrush*)pDC->SelectStockObject(NULL_BRUSH);
 		nOldROP = pDC->SetROP2(R2_COPYPEN);
 		rect.InflateRect(+1, +1);   // borders are one pixel outside
-		for (int i = 0; i < (yRes + 95) / 96; i++) {
-			pDC->Rectangle(rect.left, rect.top, rect.right, rect.bottom);
-			rect.InflateRect(+1, +1);
-		}
+		pDC->Rectangle(rect.left, rect.top, rect.right, rect.bottom);
 		pDC->SetROP2(nOldROP);
 	}
 
@@ -1007,16 +1008,17 @@ void CGMEView::OnDraw(CDC* pDC)
 		DrawConnections(pDC->m_hDC, &gdip);
 
 		if(pDoc->GetEditMode() == GME_EDIT_MODE || pDoc->GetEditMode() == GME_SET_MODE) {
+			// msdn "Interoperability between GDI and GDI+" "you shouldn't access the HDC directly from GDI until the Graphics object is destroyed"
+			gdip.~Graphics();
+
 			if( ( (selected.GetCount() > 0) || (selectedAnnotations.GetCount() > 0) ) 
 						&& !pDC->IsPrinting() && !IsPreview()) {
 				POSITION pos = selected.GetHeadPosition();
 				CRectTrackerDpi tracker;
-				OnPrepareDC(pDC);	// It's needed somehow, in spite of previous OnPrepareDC
 				CGuiObject *obj;
 				while(pos) {
 					obj = selected.GetNext(pos);
 					tracker.m_rect = obj->GetLocation();
-					pDC->LPtoDP(&tracker.m_rect);
 					tracker.m_nStyle = CRectTracker::solidLine;
 					if (obj->IsResizable())
 						tracker.m_nStyle |= CRectTracker::resizeInside;
@@ -1030,7 +1032,6 @@ void CGMEView::OnDraw(CDC* pDC)
 					if (ann->IsVisible())	// the selectedAnnotation might become hidden in this aspect
 					{
 						tracker.m_rect = ann->GetLocation();
-						pDC->LPtoDP(&tracker.m_rect);
 						tracker.m_nStyle = CRectTracker::solidLine;
 						if (ann->IsResizable())
 							tracker.m_nStyle |= CRectTracker::resizeInside;
@@ -1038,6 +1039,10 @@ void CGMEView::OnDraw(CDC* pDC)
 					}
 				}
 			}
+			::new ((void*)&gdip) Gdiplus::Graphics(pDC->m_hDC);
+			gdip.SetPageUnit(Gdiplus::UnitPixel);
+			gdip.SetSmoothingMode(m_eEdgeAntiAlias);
+			gdip.SetTextRenderingHint(m_eFontAntiAlias);
 		}
 
 		if (GetFocus() == this && ((pDoc->GetEditMode() == GME_AUTOCONNECT_MODE || pDoc->GetEditMode() == GME_SHORTAUTOCONNECT_MODE) || (tmpConnectMode))) {
@@ -1047,7 +1052,6 @@ void CGMEView::OnDraw(CDC* pDC)
 					rect = connSrcPort->GetLocation() + rect.TopLeft();
 				}
 				Gdiplus::Pen* xorPen = graphics.GetGdipPen2(&gdip, GME_DARKRED_COLOR, GME_LINE_SOLID, GME_CONNSELECT_WIDTH);
-				pDC->DPtoLP(rect);
 				gdip.DrawRectangle(xorPen, rect.left - .5f, rect.top - .5f, (float)rect.Width(), (float)rect.Height());
 
 				if ((connSrcHotSide != GME_CENTER) && (!connSrcPort)) {
@@ -1080,7 +1084,6 @@ void CGMEView::OnDraw(CDC* pDC)
 				if (connTmpPort) {
 					rect = connTmpPort->GetLocation() + rect.TopLeft();
 				}
-				pDC->DPtoLP(rect);
 				Gdiplus::Pen* xorPen = graphics.GetGdipPen2(&gdip, GME_RED_COLOR, GME_LINE_SOLID, GME_CONNSELECT_WIDTH);
 				gdip.DrawRectangle(xorPen, rect.left - .5f, rect.top - .5f, (float) rect.Width(), (float) rect.Height());
 
@@ -2760,11 +2763,9 @@ void CGMEView::DrawConnections(HDC pDC, Gdiplus::Graphics* gdip)
 
 void CGMEView::DrawTracker(CDC* pDC, const CRect& trackerRect, CRectTracker::StyleFlags styleFlags)
 {
-	CRectTracker tracker;
-	OnPrepareDC(pDC);
+	CRectTrackerDpi tracker;
 	tracker.m_rect = trackerRect;
 	tracker.m_nStyle = styleFlags;
-	pDC->LPtoDP(&tracker.m_rect);
 	tracker.Draw(pDC);
 }
 
@@ -2809,7 +2810,8 @@ void CGMEView::DrawConnectionCustomizationTracker(CDC* pDC, Gdiplus::Graphics* g
 			DrawTracker(pDC, trackerRect, CRectTracker::dottedLine);
 		}
 	} else if (customizeConnectionType == CustomPointCustomization) {
-		Gdiplus::Pen* dashPen = graphics.GetGdipPen2(gdip, GME_BLACK_COLOR, GME_LINE_DASH, 1);
+		int yRes = ::GetDeviceCaps(*pDC, LOGPIXELSY);
+		Gdiplus::Pen* dashPen = graphics.GetGdipPen2(gdip, GME_BLACK_COLOR, GME_LINE_DASH, MulDiv(1, yRes, 96));
 		ASSERT(customizeConnectionEdgeStartPoint != emptyPoint);
 		if (customizeConnectionEdgeStartPoint != emptyPoint)
 			gdip->DrawLine(dashPen, customizeConnectionEdgeStartPoint.x, customizeConnectionEdgeStartPoint.y,
