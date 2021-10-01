@@ -135,6 +135,11 @@ BOOL CInPlaceEditDialog::OnInitDialog()
 
 	m_realParentCWnd = GetParent();
 
+	CRect windowRect;
+	GetWindowRect(windowRect);
+	CRect clientRect;
+	GetClientRect(clientRect);
+
 	///////////////////////////////////////////////////////////////////////////////////////////////////
 	CDC dc;
 	dc.Attach(m_transformHDC);
@@ -178,6 +183,13 @@ BOOL CInPlaceEditDialog::OnInitDialog()
 
 	POINT editLeftTopPt = { m_labelRect.left, m_labelRect.top };
 	BOOL success = ::LPtoDP(m_transformHDC, &editLeftTopPt, 1);
+
+	POINT borderWidth = { (windowRect.Width() - clientRect.Width()) / 2, (windowRect.Height() - clientRect.Height()) / 2 };
+	borderWidth.x = MulDiv(borderWidth.x, viewPortExt.cx, windowExt.cx);
+	borderWidth.y = MulDiv(borderWidth.y, viewPortExt.cy, windowExt.cy);
+	editLeftTopPt.x += borderWidth.x;
+	editLeftTopPt.y -= borderWidth.y;
+
 	m_intendedParentCWnd->ClientToScreen(&editLeftTopPt);
 	m_initialRect = CRect(editLeftTopPt, cSize);
 
