@@ -1003,12 +1003,12 @@ void CComponentObj::HandleError( Util::Exception* pEx )
 	strOut += "Exception message : " + pEx->getErrorMessage();
 	if ( pEx->getKind() == "MON::Exception" ) {
 		char chBuffer[ 100 ];
-		sprintf_s( chBuffer, "%x", ( (MON::Exception*) pEx)->getHResult() );
+		sprintf_s( chBuffer, "%x", (unsigned int)( (MON::Exception*) pEx)->getHResult() );
 		strOut += "\nException hresult : " + std::string( chBuffer );
 	}
 	else if ( pEx->getKind() == "BON::Exception" ) {
 		char chBuffer[ 100 ];
-		sprintf_s( chBuffer, "%x", ( (BON::Exception*) pEx)->getHResult() );
+		sprintf_s( chBuffer, "%x", (unsigned int)( (BON::Exception*) pEx)->getHResult() );
 		strOut += "\nException hresult : " + std::string( chBuffer );
 	}
 	AfxMessageBox( CString(strOut.c_str()) );

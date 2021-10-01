@@ -89,7 +89,7 @@ namespace Util
 	Exception& Exception::operator << ( long plong)
 	{
 		char chBuffer[ 100 ];
-		sprintf_s( chBuffer, "%d", plong);
+		sprintf_s( chBuffer, "%ld", plong);
 		addParameter( std::string( chBuffer ) );
 		return *this;
 	}
