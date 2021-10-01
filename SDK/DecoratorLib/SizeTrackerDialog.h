@@ -47,11 +47,13 @@ protected:
 	CWnd*					m_intendedParentCWnd;
 	bool					m_bPermanentCWnd;
 	CWnd*					m_realParentCWnd;
-	HDC						m_transformHDC;
 	CRect					m_boundsLimit;
 	CPoint					m_mouseClick;	// Screen coordinates of the mouse click which invoked the in-place edit
 	CRect					m_initialRect;
 	ResizeType				m_resizeType;
+	int m_mapmode;
+	CPoint m_viewportOrg;
+	CSize m_viewportExt;
 
 	CString	GetStrToDisplay(const CRect& location);
 	CPoint	GetAdjustedPosition(const CPoint& pt);

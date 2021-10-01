@@ -87,12 +87,12 @@ CPoint	CSizeTrackerDialog::GetAdjustedPosition(const CPoint& pt)
 	switch(m_resizeType) {
 		case RightEdgeResize:			dx = SizeTrackerMargin, dy = 0;																	break;
 		case BottomEdgeResize:			dx = 0, dy = SizeTrackerMargin;																	break;
-		case LeftEdgeResize:			dx = -(m_initialRect.Width() + SizeTrackerMargin), dy = 0;											break;
-		case TopEdgeResize:				dx = 0, dy = -(m_initialRect.Height() + SizeTrackerMargin);											break;
-		case TopLeftCornerResize:		dx = -(m_initialRect.Width() + SizeTrackerMargin), dy = -(m_initialRect.Height() + SizeTrackerMargin);	break;
-		case TopRightCornerResize:		dx = SizeTrackerMargin, dy = -(m_initialRect.Height() + SizeTrackerMargin);							break;
+		case LeftEdgeResize:			dx = -(SizeTrackerWidth + SizeTrackerMargin), dy = 0;											break;
+		case TopEdgeResize:				dx = 0, dy = -(SizeTrackerHeight + SizeTrackerMargin);											break;
+		case TopLeftCornerResize:		dx = -(SizeTrackerWidth + SizeTrackerMargin), dy = -(SizeTrackerMargin);	break;
+		case TopRightCornerResize:		dx = SizeTrackerMargin, dy = -(SizeTrackerHeight + SizeTrackerMargin);							break;
 		case BottomRightCornerResize:	dx = SizeTrackerMargin, dy = SizeTrackerMargin;													break;
-		case BottomLeftCornerResize:	dx = -(m_initialRect.Width() + SizeTrackerMargin), dy = SizeTrackerMargin;							break;
+		case BottomLeftCornerResize:	dx = -(SizeTrackerWidth + SizeTrackerMargin), dy = SizeTrackerMargin;							break;
 	}
 
 	CPoint offsetted = pt;
@@ -108,8 +108,13 @@ void CSizeTrackerDialog::SetParameters(const CRect& initialRect, const CPoint& m
 	m_mouseClick				= mouseClick;
 	m_intendedParentCWnd		= parentCWnd;
 	m_bPermanentCWnd			= isPermanentCWnd;
-	m_transformHDC				= transformHDC;
 	m_resizeType				= resizeType;
+
+	// n.b. do not save transformHDC, it is temporary
+	m_mapmode = GetMapMode(transformHDC);
+	ASSERT(mapmode == MM_ISOTROPIC);
+	GetViewportOrgEx(transformHDC, &m_viewportOrg);
+	GetViewportExtEx(transformHDC, &m_viewportExt);
 }
 
 void CSizeTrackerDialog::AdjustPositionAndText(const CPoint& point, const CRect& location)
@@ -121,6 +126,15 @@ void CSizeTrackerDialog::AdjustPositionAndText(const CPoint& point, const CRect&
 
 	m_staticWnd->SetWindowText(GetStrToDisplay(location));
 	CPoint adjPos = GetAdjustedPosition(point);
+
+	CClientDC transformDC(this);
+	transformDC.SetMapMode(m_mapmode);
+	transformDC.SetViewportExt(m_viewportExt);
+	transformDC.SetWindowExt(100, 100);
+	transformDC.SetViewportOrg(m_viewportOrg);
+
+	BOOL success = ::LPtoDP(transformDC, &adjPos, 1);
+
 	MoveWindow(adjPos.x, adjPos.y, m_initialRect.Width(), m_initialRect.Height());
 }
 
