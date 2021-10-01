@@ -194,11 +194,11 @@ void CChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle) {
 
 BOOL CChildFrame::PreTranslateMessage(MSG* pMsg)
 {
+	long xPos = GET_X_LPARAM(pMsg->lParam);
+	long yPos = GET_Y_LPARAM(pMsg->lParam);
 
-	if (pMsg->message == WM_MBUTTONUP) {
+	auto& GetChildFrame = [&]() {
 		CMFCTabCtrl* tabCtrl = GetRelatedTabGroup();
-		long xPos = GET_X_LPARAM(pMsg->lParam);
-		long yPos = GET_Y_LPARAM(pMsg->lParam);
 		CPoint point(xPos, yPos);
 		if (tabCtrl->IsPtInTabArea(point)) {
 			int i = tabCtrl->GetTabFromPoint(point);
@@ -206,9 +206,57 @@ BOOL CChildFrame::PreTranslateMessage(MSG* pMsg)
 				CWnd* tabCtrlWnd = tabCtrl->GetTabWnd(i);
 				if (tabCtrlWnd != NULL && tabCtrlWnd->IsKindOf(RUNTIME_CLASS(CChildFrame))) {
 					CChildFrame* cf = STATIC_DOWNCAST(CChildFrame, tabCtrlWnd);
-					cf->PostMessage(WM_CLOSE);
+					return cf;
 				}
 			}
+		}
+		return (CChildFrame*)nullptr;
+	};
+
+	CChildFrame* cf;
+	if (pMsg->message == WM_MBUTTONUP && (cf = GetChildFrame())) {
+		if (cf) {
+			cf->PostMessage(WM_CLOSE);
+			return TRUE;
+		}
+	}
+	else if (pMsg->message == WM_RBUTTONUP && (cf = GetChildFrame())) {
+		CMenu menu;
+		menu.LoadMenu(IDR_TAB_MENU);
+		CMenu *submenu = menu.GetSubMenu(0);
+		CPoint screen = { xPos, yPos };
+		::ClientToScreen(pMsg->hwnd, &screen);
+
+		int cmd = (int)submenu->TrackPopupMenu(TPM_RETURNCMD | TPM_LEFTALIGN | TPM_RIGHTBUTTON,
+			screen.x, screen.y, GetParent());
+		switch (cmd) {
+		case ID_CLOSEOTHERS_CLOSE:
+			cf->PostMessage(WM_CLOSE);
+			return TRUE;
+		case ID_CLOSEOTHERS_CLOSETOTHERIGHT: // fallthrough
+		case ID_CLOSEOTHERS_CLOSEOTHERS:
+		{
+			CMFCTabCtrl* tabCtrl = GetRelatedTabGroup();
+			int currentTab = 0;
+			for (int i = 0; i < tabCtrl->GetTabsNum(); i++) {
+				CWnd* tab = tabCtrl->GetTabWnd(i);
+				if (tab == cf) {
+					currentTab = i;
+				}
+			}
+			for (int i = 0; i < tabCtrl->GetTabsNum(); i++) {
+				CWnd* tab = tabCtrl->GetTabWnd(i);
+				CRect rect;
+				tabCtrl->GetTabRect(i, rect);
+
+				if (tab == cf) {
+				}
+				else if (cmd != ID_CLOSEOTHERS_CLOSETOTHERIGHT || i > currentTab) {
+					tab->PostMessage(WM_CLOSE);
+				}
+			}
+			return TRUE;
+		}
 		}
 	}
 

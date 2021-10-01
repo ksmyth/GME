@@ -103,6 +103,7 @@
 #define IDD_PRINT_DIALOG                229
 #define IDD_PRINTSETUP_DIALOG           230
 #define IDD_PARADIGMPROPERTIES_DIALOG   231
+#define IDR_TAB_MENU                    232
 #define IDC_NAME                        1000
 #define IDC_TYPENAME                    1001
 #define IDC_KINDNAME                    1002
@@ -520,6 +521,9 @@
 #define ID_CONNCNTX_REVERSE             33270
 #define ID_VIEW_SHOWCONNECTEDPORTSONLY  33271
 #define ID_PORTCNTX_DELETE              33272
+#define ID_CLOSEOTHERS_CLOSETOTHERIGHT  33273
+#define ID_CLOSEOTHERS_CLOSE            33274
+#define ID_CLOSEOTHERS_CLOSEOTHERS      33275
 #pragma region Help IDs
 #define ID_HELP_PARADIGMHELP            0x9000
 #define ID_HELP_PARADIGMHELP_FIRST      0x9001
@@ -542,8 +546,8 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        232
-#define _APS_NEXT_COMMAND_VALUE         33273
+#define _APS_NEXT_RESOURCE_VALUE        233
+#define _APS_NEXT_COMMAND_VALUE         33276
 #define _APS_NEXT_CONTROL_VALUE         1139
 #define _APS_NEXT_SYMED_VALUE           119
 #endif

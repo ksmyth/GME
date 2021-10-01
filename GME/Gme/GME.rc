@@ -651,6 +651,16 @@ BEGIN
     END
 END
 
+IDR_TAB_MENU MENU
+BEGIN
+    POPUP "Tab menu"
+    BEGIN
+        MENUITEM "&Close",                       ID_CLOSEOTHERS_CLOSE
+        MENUITEM "Close &others",                ID_CLOSEOTHERS_CLOSEOTHERS
+        MENUITEM "Close to the &right",          ID_CLOSEOTHERS_CLOSETOTHERIGHT
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
