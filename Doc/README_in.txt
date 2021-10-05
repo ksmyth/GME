@@ -25,6 +25,11 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
+Release Notes of Release 21.10.5
+----------------------------------
+  - Binary compatibility with 11.12.2
+  - Fix high-DPI rendering for selection and resize in model editor
+
 Release Notes of Release 21.4.1
 ----------------------------------
   - Binary compatibility with 11.12.2
