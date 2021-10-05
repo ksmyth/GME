@@ -5257,7 +5257,7 @@ bool CCoreXmlFile::makeSureFileExistsInVerSys( const std::string& p_fname, const
 	}
 	catch( hresult_exception& e)
 	{
-		char buff[200]; sprintf( buff, "Could not get \"%s\" file from source control. Exception code: 0x%x", fulllocalfname.c_str(), e.hr);
+		char buff[200]; sprintf( buff, "Could not get \"%s\" file from source control. Exception code: 0x%x", fulllocalfname.c_str(), (unsigned int)e.hr);
 		sendMsg( buff, MSG_ERROR);
 		return false;
 	}

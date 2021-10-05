@@ -317,7 +317,7 @@ namespace OclCommon
 					StateItemVector vecItems = m_vecContexts[ i ].GetState();
 					if ( i != 0 && vecItems[ 0 ].name == "self" ) {
 						char chBuffer[ 100 ];
-						sprintf_s( chBuffer, sizeof(chBuffer), "%lu", i + 1 );
+						sprintf_s( chBuffer, sizeof(chBuffer), "%u", i + 1 );
 						vecItems[ 0 ].name = "self - " + std::string( chBuffer );
 					}
 					for ( unsigned int j = 0 ; j < vecItems.size() ; j++ )

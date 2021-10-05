@@ -81,7 +81,7 @@ namespace OclCommonEx {
 			}
 			else if ( arrBounds.GetSize() == 1 ) {
 				int iMultiplicity = 0;
-				if ( _stscanf_s( (LPCTSTR) arrBounds[ 0 ], _T("%ld"), &iMultiplicity ) != 1 ) {
+				if ( _stscanf_s( (LPCTSTR) arrBounds[ 0 ], _T("%d"), &iMultiplicity ) != 1 ) {
 					bError = true;
 					break;
 				}
@@ -98,7 +98,7 @@ namespace OclCommonEx {
 				int iMultiplicityMin = 0;
 				int iMultiplicityMax = 0;
 
-				if( _stscanf_s( (LPCTSTR) arrBounds[ 0 ], _T("%ld"), &iMultiplicityMin ) != 1 ) {
+				if( _stscanf_s( (LPCTSTR) arrBounds[ 0 ], _T("%d"), &iMultiplicityMin ) != 1 ) {
 					bError = true;
 					break;
 				}
@@ -111,7 +111,7 @@ namespace OclCommonEx {
 						bMultiple = true;
 				}
 
-				if( _stscanf_s( (LPCTSTR) arrBounds[ 1 ], _T("%ld"), &iMultiplicityMax ) != 1 ) {
+				if( _stscanf_s( (LPCTSTR) arrBounds[ 1 ], _T("%d"), &iMultiplicityMax ) != 1 ) {
 					if ( arrBounds[ 1 ] != _T("*") ) {
 						bError = true;
 						break;
