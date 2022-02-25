@@ -25,6 +25,13 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
+Release Notes
+----------------------------------
+  - Binary compatibility with 11.12.2
+  - Render connection customization for high-dpi
+  - Add right-click menu to model editor tabs
+  - Fix dragging to resize FCO under high-dpi
+
 Release Notes of Release 21.10.5
 ----------------------------------
   - Binary compatibility with 11.12.2
