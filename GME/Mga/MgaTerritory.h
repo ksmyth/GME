@@ -35,7 +35,9 @@ public:
 		MGA_TRACE("Destructed: %s - %08X\n", sig, this);
 #endif
 		MARKSIG('9'); 
-		if(coreterr) Destroy();	
+		if (coreterr) {
+			Destroy();
+		}
 	}
 
 DECLARE_PROTECT_FINAL_CONSTRUCT()

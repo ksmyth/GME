@@ -31,8 +31,10 @@ protected:
 // in DEBUG, inFCO is transformed to a macro, which checks territory compatibility
  CComPtr<FCO> innFCO;
 #define inFCO  (tcheck() ,innFCO)
- void tcheck() { ASSERT(("You are working with an object from another territory, may ignore",\
-							territory == innFCO->mgaproject->activeterr)); }
+ void tcheck() {
+	 ASSERT(("You are working with an object from another territory, may ignore",\
+							territory == innFCO->mgaproject->activeterr));
+ }
 #else
  CComPtr<FCO> inFCO;
 #define innFCO inFCO
