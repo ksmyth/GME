@@ -27,7 +27,15 @@
 
 #define _ATL_APARTMENT_THREADED
 
+#ifdef _ATL_DEBUG_INTERFACES
+#pragma warning(push)
+#pragma warning(disable : 4777)	// 'swprintf_s' : format string '%d' requires an argument of type 'int', but variadic argument 3 has type 'ULONG'	Core	C : \Program Files(x86)\Microsoft Visual Studio 14.0\VC\atlmfc\include\atlbase.h	2760
 #include <atlbase.h>
+#pragma warning(pop)
+#else
+#include <atlbase.h>
+#endif
+
 //You may derive a class from CComModule and use it if you want to override
 //something, but do not change the name of _Module
 extern CComModule _Module;
