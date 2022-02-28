@@ -1127,12 +1127,20 @@ STDMETHODIMP CMgaProject::CreateTerritory(IMgaEventSink *sink, IMgaTerritory **p
 // MUST SUCCEED
 		CComPtr< CMgaTerritory > ster;
 		CreateComObject(ster);
+#ifdef _ATL_DEBUG_INTERFACES
+		tt->QueryInterface(&ster->coreterr);
+#else
 		ster->coreterr = tt;
+#endif
 		ster->mgaproject = this;; 
 		allterrs.push_front(ster);
 		ster->handler=sink;
 		ster->rwhandler=rwsink;
+#ifdef _ATL_DEBUG_INTERFACES
+		ster.QueryInterface(pp);
+#else
 		*pp = ster.Detach();
+#endif
     }
     COMCATCH(;);
 }
@@ -1403,7 +1411,14 @@ STDMETHODIMP CMgaProject::BeginTransaction(IMgaTerritory *ter, transactiontype_e
 		COMTHROW(ter->get_Project(&p));
 		if (p != this)
 			COMTHROW(E_MGA_FOREIGN_OBJECT);
+#ifdef _ATL_DEBUG_INTERFACES
+		IUnknown* pUnk = ter;
+		while (IsQIThunk(pUnk))
+			pUnk = ((ATL::_QIThunk *)(pUnk))->m_pUnk;
+		CMgaTerritory *t = static_cast<CMgaTerritory *>(pUnk);
+#else
 		CMgaTerritory *t = static_cast<CMgaTerritory *>(ter);
+#endif
 		if (!t->coreterr)
 			COMTHROW(E_MGA_TARGET_DESTROYED);
 		read_only = (mode == TRANSACTION_READ_ONLY);
@@ -1428,6 +1443,7 @@ STDMETHODIMP CMgaProject::BeginTransactionInNewTerr( transactiontype_enum mode, 
 {
 	COMTRY {
 		if(baseterr) COMTHROW(E_MGA_ALREADY_IN_TRANSACTION);
+		// CHECK_OUTPTRPAR(ter)  // n.b. can't do this because of backwards compatibility
 
 		// create a new territory
 		CComPtr<IMgaTerritory> ttemp;
