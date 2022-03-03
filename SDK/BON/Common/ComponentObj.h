@@ -210,6 +210,7 @@ public:
 			CComPtr<IUnknown> ret;
 			if (SUCCEEDED(GetIDispatchComponentEx(pComp, *((const IID*)riid), (void**)&ret.p)))
 			{
+				this->InternalRelease(); // n.b. CCmdTarget::InternalQueryInterface calls ExternalAddRef() for us
 				return ret.Detach();
 			}
 		}
