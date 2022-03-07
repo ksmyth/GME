@@ -27,11 +27,14 @@
 #ifndef SVN_TYPES_H
 #define SVN_TYPES_H
 
+#include "svn_types_impl.h"
+
 /* ### this should go away, but it causes too much breakage right now */
 #include <stdlib.h>
 #include <limits.h> /* for ULONG_MAX */
 
 #include <apr.h>         /* for apr_size_t, apr_int64_t, ... */
+#include <apr_version.h>
 #include <apr_errno.h>   /* for apr_status_t */
 #include <apr_pools.h>   /* for apr_pool_t */
 #include <apr_hash.h>    /* for apr_hash_t */
@@ -61,6 +64,50 @@ extern "C" {
 # else
 #  define SVN_DEPRECATED
 # endif
+#endif
+
+
+/** Macro used to mark experimental functions.
+ *
+ * @since New in 1.9.
+ */
+#ifndef SVN_EXPERIMENTAL
+# if !defined(SWIGPERL) && !defined(SWIGPYTHON) && !defined(SWIGRUBY)
+#  if defined(__has_attribute)
+#    if __has_attribute(__warning__)
+#      define SVN_EXPERIMENTAL __attribute__((warning("experimental function used")))
+#    else
+#      define SVN_EXPERIMENTAL
+#    endif
+#  elif !defined(__llvm__) && defined(__GNUC__) \
+      && (__GNUC__ >= 4 || (__GNUC__==3 && __GNUC_MINOR__>=1))
+#   define SVN_EXPERIMENTAL __attribute__((warning("experimental function used")))
+#  elif defined(_MSC_VER) && _MSC_VER >= 1300
+#   define SVN_EXPERIMENTAL __declspec(deprecated("experimental function used"))
+#  else
+#   define SVN_EXPERIMENTAL
+#  endif
+# else
+#  define SVN_EXPERIMENTAL
+# endif
+#endif
+
+/** Macro used to mark functions that require a final null sentinel argument.
+ *
+ * @since New in 1.9.
+ */
+#ifndef SVN_NEEDS_SENTINEL_NULL
+#  if defined(__has_attribute)
+#    if __has_attribute(__sentinel__)
+#      define SVN_NEEDS_SENTINEL_NULL __attribute__((sentinel))
+#    else
+#      define SVN_NEEDS_SENTINEL_NULL
+#    endif
+#  elif defined(__GNUC__) && (__GNUC__ >= 4)
+#    define SVN_NEEDS_SENTINEL_NULL __attribute__((sentinel))
+#  else
+#    define SVN_NEEDS_SENTINEL_NULL
+#  endif
 #endif
 
 
@@ -102,6 +149,26 @@ typedef int svn_boolean_t;
 /** uhh... false */
 #define FALSE 0
 #endif /* FALSE */
+
+
+
+/* Declaration of a unique type, never defined, for the SVN_VA_NULL macro.
+ *
+ * NOTE: Private. Not for direct use by third-party code.
+ */
+struct svn__null_pointer_constant_stdarg_sentinel_t;
+
+/** Null pointer constant used as a sentinel in variable argument lists.
+ *
+ * Use of this macro ensures that the argument is of the correct size when a
+ * pointer is expected. (The macro @c NULL is not defined as a pointer on
+ * all systems, and the arguments to variadic functions are not converted
+ * automatically to the expected type.)
+ *
+ * @since New in 1.9.
+ */
+#define SVN_VA_NULL ((struct svn__null_pointer_constant_stdarg_sentinel_t*)0)
+/* See? (char*)NULL -- They have the same length, but the cast looks ugly. */
 
 
 
@@ -186,21 +253,26 @@ typedef struct svn_version_t svn_version_t;
  * These functions enable the caller to dereference an APR hash table index
  * without type casts or temporary variables.
  *
- * ### These are private, and may go away when APR implements them natively.
+ * These functions are provided by APR itself from version 1.5.
+ * Definitions are provided here for when using older versions of APR.
  * @{
  */
 
+#if !APR_VERSION_AT_LEAST(1, 5, 0)
+
 /** Return the key of the hash table entry indexed by @a hi. */
 const void *
-svn__apr_hash_index_key(const apr_hash_index_t *hi);
+apr_hash_this_key(apr_hash_index_t *hi);
 
 /** Return the key length of the hash table entry indexed by @a hi. */
 apr_ssize_t
-svn__apr_hash_index_klen(const apr_hash_index_t *hi);
+apr_hash_this_key_len(apr_hash_index_t *hi);
 
 /** Return the value of the hash table entry indexed by @a hi. */
 void *
-svn__apr_hash_index_val(const apr_hash_index_t *hi);
+apr_hash_this_val(apr_hash_index_t *hi);
+
+#endif
 
 /** @} */
 
@@ -219,32 +291,21 @@ svn__apr_hash_index_val(const apr_hash_index_t *hi);
                       || ((s) == APR_OS_START_SYSERR + ERROR_INVALID_NAME))
 #endif
 
+/** On Windows, APR_STATUS_IS_EPIPE does not include ERROR_NO_DATA error.
+ * So we include it.*/
+/* ### These fixes should go into APR. */
+#ifndef WIN32
+#define SVN__APR_STATUS_IS_EPIPE(s)  APR_STATUS_IS_EPIPE(s)
+#else
+#define SVN__APR_STATUS_IS_EPIPE(s)  (APR_STATUS_IS_EPIPE(s) \
+                      || ((s) == APR_OS_START_SYSERR + ERROR_NO_DATA))
+#endif
+
 /** @} */
 
 
 
-/** The various types of nodes in the Subversion filesystem. */
-typedef enum svn_node_kind_t
-{
-  /** absent */
-  svn_node_none,
-
-  /** regular file */
-  svn_node_file,
-
-  /** directory */
-  svn_node_dir,
-
-  /** something's here, but we don't know what */
-  svn_node_unknown,
-
-  /**
-   * symbolic link
-   * @note This value is not currently used by the public API.
-   * @since New in 1.8.
-   */
-  svn_node_symlink
-} svn_node_kind_t;
+/* NOTE: svn_node_kind_t is defined in svn_types_impl.h */
 
 /** Return a constant string expressing @a kind as an English word, e.g.,
  * "file", "dir", etc.  The string is not localized, as it may be used for
@@ -266,23 +327,7 @@ svn_node_kind_t
 svn_node_kind_from_word(const char *word);
 
 
-/** Generic three-state property to represent an unknown value for values
- * that are just like booleans.  The values have been set deliberately to
- * make tristates disjoint from #svn_boolean_t.
- *
- * @note It is unsafe to use apr_pcalloc() to allocate these, since '0' is
- * not a valid value.
- *
- * @since New in 1.7. */
-typedef enum svn_tristate_t
-{
-  /** state known to be false (the constant does not evaulate to false) */
-  svn_tristate_false = 2,
-  /** state known to be true */
-  svn_tristate_true,
-  /** state could be true or false */
-  svn_tristate_unknown
-} svn_tristate_t;
+/* NOTE: svn_tristate_t is defined in svn_types_impl.h */
 
 /** Return a constant string "true", "false" or NULL representing the value of
  * @a tristate.
@@ -336,20 +381,16 @@ svn_tristate__from_word(const char * word);
  *  2. Creating a new textual name similar to
  *     SVN_SUBST__SPECIAL_LINK_STR in libsvn_subr/subst.c.
  *  3. Handling the translation/detranslation case for the new type in
- *     create_special_file and detranslate_special_file, using the
+ *     create_special_file_from_stream and detranslate_special_file, using the
  *     routines from 1.
  */
 
 
 
-/** A revision number. */
-typedef long int svn_revnum_t;
+/* NOTE: svn_revnum_t and SVN_INVALID_REVNUM are defined in svn_types_impl.h */
 
 /** Valid revision numbers begin at 0 */
 #define SVN_IS_VALID_REVNUM(n) ((n) >= 0)
-
-/** The 'official' invalid revision num */
-#define SVN_INVALID_REVNUM ((svn_revnum_t) -1)
 
 /** Not really invalid...just unimportant -- one day, this can be its
  * own unique value, for now, just make it the same as
@@ -414,55 +455,7 @@ enum svn_recurse_kind
   svn_recursive
 };
 
-/** The concept of depth for directories.
- *
- * @note This is similar to, but not exactly the same as, the WebDAV
- * and LDAP concepts of depth.
- *
- * @since New in 1.5.
- */
-typedef enum svn_depth_t
-{
-  /* The order of these depths is important: the higher the number,
-     the deeper it descends.  This allows us to compare two depths
-     numerically to decide which should govern. */
-
-  /** Depth undetermined or ignored.  In some contexts, this means the
-      client should choose an appropriate default depth.  The server
-      will generally treat it as #svn_depth_infinity. */
-  svn_depth_unknown    = -2,
-
-  /** Exclude (i.e., don't descend into) directory D.
-      @note In Subversion 1.5, svn_depth_exclude is *not* supported
-      anywhere in the client-side (libsvn_wc/libsvn_client/etc) code;
-      it is only supported as an argument to set_path functions in the
-      ra and repos reporters.  (This will enable future versions of
-      Subversion to run updates, etc, against 1.5 servers with proper
-      svn_depth_exclude behavior, once we get a chance to implement
-      client-side support for svn_depth_exclude.)
-  */
-  svn_depth_exclude    = -1,
-
-  /** Just the named directory D, no entries.  Updates will not pull in
-      any files or subdirectories not already present. */
-  svn_depth_empty      =  0,
-
-  /** D + its file children, but not subdirs.  Updates will pull in any
-      files not already present, but not subdirectories. */
-  svn_depth_files      =  1,
-
-  /** D + immediate children (D and its entries).  Updates will pull in
-      any files or subdirectories not already present; those
-      subdirectories' this_dir entries will have depth-empty. */
-  svn_depth_immediates =  2,
-
-  /** D + all descendants (full recursion from D).  Updates will pull
-      in any files or subdirectories not already present; those
-      subdirectories' this_dir entries will have depth-infinity.
-      Equivalent to the pre-1.5 default update behavior. */
-  svn_depth_infinity   =  3
-
-} svn_depth_t;
+/* NOTE: svn_depth_t is defined in svn_types_impl.h */
 
 /** Return a constant string expressing @a depth as an English word,
  * e.g., "infinity", "immediates", etc.  The string is not localized,
@@ -572,7 +565,7 @@ typedef struct svn_dirent_t
   /** node kind */
   svn_node_kind_t kind;
 
-  /** length of file text, or 0 for directories */
+  /** length of file text, otherwise SVN_INVALID_FILESIZE */
   svn_filesize_t size;
 
   /** does the node have props? */
@@ -991,13 +984,17 @@ typedef svn_error_t *(*svn_log_message_receiver_t)(
   const char *message,
   apr_pool_t *pool);
 
-
 
 /** Callback function type for commits.
  *
  * When a commit succeeds, an instance of this is invoked with the
  * @a commit_info, along with the @a baton closure.
  * @a pool can be used for temporary allocations.
+ *
+ * @note Implementers of this callback that pass this callback to
+ * svn_ra_get_commit_editor3() should be careful with returning errors
+ * as these might be returned as commit errors. See the documentation
+ * of svn_ra_get_commit_editor3() for more details.
  *
  * @since New in 1.4.
  */

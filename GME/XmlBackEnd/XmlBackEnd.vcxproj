@@ -133,14 +133,15 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy /Y/D/F ..\lib\libeay32.dll  "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\ssleay32.dll  "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libapr-1.dll "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libaprutil-1.dll "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libapriconv-1.dll "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\xerces-c_3_*.dll "$(OutDir)"</Command>
+      <Command>xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libsvn_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libapr_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libaprutil_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\intl3_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libsasl32.dll  "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\xerces-c_3_2Win32.dll "$(OutDir)"
+</Command>
       <Message>Copying dependency DLLs...</Message>
-      <Outputs>$(OutDir)\libeay32.dll</Outputs>
+      <Outputs>$(OutDir)\libsasl32.dll</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -225,14 +226,15 @@ copy ..\lib\xerces-c_3_*.dll "$(OutDir)"</Command>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <CustomBuildStep>
-      <Command>xcopy /Y/D/F ..\lib\libeay32.dll  "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\ssleay32.dll  "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libapr-1.dll "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libaprutil-1.dll "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libapriconv-1.dll "$(OutDir)" &amp;&amp; ^
-xcopy /Y/D/F ..\lib\xerces-c_3_2Win32.dll "$(OutDir)"</Command>
+      <Command>xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libsvn_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libapr_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libaprutil_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\intl3_tsvn32.dll "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\subv_$(ConfigurationName)\libsasl32.dll  "$(OutDir)" &amp;&amp; ^
+xcopy /Y/D/F ..\lib\xerces-c_3_2Win32.dll "$(OutDir)"
+</Command>
       <Message>Copying dependency DLLs...</Message>
-      <Outputs>$(OutDir)\libeay32.dll</Outputs>
+      <Outputs>$(OutDir)\libsasl32.dll</Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

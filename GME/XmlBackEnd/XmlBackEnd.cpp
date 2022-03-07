@@ -133,3 +133,7 @@ extern "C" FILE * __cdecl __iob_func(void)
 
 // https://msdn.microsoft.com/en-us/library/bb531344.aspx#BK_CRT
 #pragma comment(lib, "legacy_stdio_definitions.lib")
+
+
+#pragma comment(lib, "libsvn_tsvn32.lib")
+#pragma comment(lib, "libapr_tsvn32.lib")

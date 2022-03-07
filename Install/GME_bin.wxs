@@ -701,9 +701,6 @@
      </Component>
 
       <?if $(sys.BUILDARCH)=x86 ?>
-      <Component Id="ssleay32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
-        <File Id="ssleay32.dll" Name="ssleay32.dll" KeyPath="yes" Source="..\GME\lib\ssleay32.dll" />
-      </Component>
 
       <Component Id="TableEditor.dll" Directory="INSTALLDIR_TOOLS$(sys.BUILDARCH)">
         <File Id="TableEditor.dll" Name="TableEditor.dll" KeyPath="yes" Source="..\Tools\TableEditor\$(var.Release)\TableEditor.dll">
@@ -792,20 +789,20 @@
         </RegistryKey>
       </Component>
 
-      <Component Id="libapr_1.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
-        <File Id="libapr_1.dll" Name="libapr-1.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libapr-1.dll" />
+      <Component Id="libapr_tsvn32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
+        <File Id="libapr_tsvn32.dll" Name="libapr_tsvn32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libapr_tsvn32.dll" />
       </Component>
 
-      <Component Id="libapriconv_1.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
-        <File Id="libapriconv_1.dll" Name="libapriconv-1.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libapriconv-1.dll" />
+      <Component Id="libaprutil_tsvn32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
+        <File Id="libaprutil_tsvn32.dll" Name="libaprutil_tsvn32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libaprutil_tsvn32.dll" />
       </Component>
 
-      <Component Id="libaprutil_1.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
-        <File Id="libaprutil_1.dll" Name="libaprutil-1.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libaprutil-1.dll" />
+      <Component Id="intl3_tsvn32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
+        <File Id="intl3_tsvn32.dll" Name="intl3_tsvn32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\intl3_tsvn32.dll" />
       </Component>
 
-      <Component Id="libeay32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
-        <File Id="libeay32.dll" Name="libeay32.dll" KeyPath="yes" Source="..\GME\lib\libeay32.dll" />
+      <Component Id="libsvn_tsvn32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
+        <File Id="libsvn_tsvn32.dll" Name="libsvn_tsvn32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libsvn_tsvn32.dll" />
       </Component>
 
       <Component Id="JAUT.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
