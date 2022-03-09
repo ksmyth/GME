@@ -12,6 +12,8 @@ import os.path
 import sys
 import subprocess
 import win32com.client
+import win32api
+import time
 from prefs import prefs
 
 #
@@ -114,7 +116,7 @@ def test_VS():
 
 def build_VS(sln_path, config_name, arch=None, msbuild=MSBUILD, target=None):
     """
-    Builds a Microsoft Visual Studio 2010 project or entire solution.
+    Builds a Microsoft Visual Studio project or entire solution.
     It cleans the project/solution before building it if the global 'clean' preference
     is set.
     params
@@ -257,18 +259,40 @@ import xml.sax
 from xml.sax.handler import ContentHandler
 
 
-def download_file(url, filename):
+def sha1_filename(filename):
+    import hashlib
+    m = hashlib.sha1()
+    with open(filename, 'rb') as input:
+        while True:
+            chunk = input.read(4096 * 20)
+            if not chunk:
+                break
+            m.update(chunk)
+    return m.hexdigest()
+
+
+def download_file(url, filename, expected_sha1):
+    headers = {}
     if os.path.isfile(filename):
-        return
-    print('Downloading {} => {}'.format(url, filename))
+        mtime = time.gmtime(os.stat(filename).st_mtime)
+        timestamp = time.strftime('%a, %d %b %Y %H:%M:%S GMT', mtime)
+        headers["If-Modified-Since"] = timestamp
+
+    print('Downloading {} => {} ({})'.format(url, filename, expected_sha1))
     if os.path.dirname(filename):
         try:
             os.makedirs(os.path.dirname(filename))
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
-    r = requests.get(url, stream=True)
+    r = requests.get(url, headers=headers, stream=True)
     r.raise_for_status()
+    if r.status_code == 304:
+        print('  Skipping {}: Last-Modified {}'.format(filename, r.headers.get('Last-Modified')))
+        sha1 = sha1_filename(filename)
+        if expected_sha1 != sha1:
+            raise ValueError('File at {} changed. Update @Name and expected_sha1 (expect {} vs actual {})'.format(url, expected_sha1, sha1))
+        return
     fd, tmp_path = tempfile.mkstemp()
     # wix bootstrapper uses SHA1
     hash = hashlib.sha1()
@@ -285,6 +309,8 @@ def download_file(url, filename):
     else:
         os.rename(tmp_path, filename)
         print('  => {} {}'.format(filename, hash.hexdigest()))
+        if expected_sha1 != hash.hexdigest():
+            raise ValueError('File at {} changed. Update @Name and expected_sha1'.format(url))
 
 
 class WixProcessingInstructionHandler(ContentHandler):
@@ -297,6 +323,13 @@ class WixProcessingInstructionHandler(ContentHandler):
             eval(compile(data, '<string>', 'exec'), globals(), self.defines)
         elif target == 'include':
             pass  # TODO
+
+
+def get_version_number(filename):
+    info = win32api.GetFileVersionInfo(filename, "\\")
+    ms = info['FileVersionMS']
+    ls = info['FileVersionLS']
+    return win32api.HIWORD(ms), win32api.LOWORD(ms), win32api.HIWORD(ls), win32api.LOWORD(ls)
 
 
 def download_bundle_deps(bundle_wxs, define_files=[]):
@@ -316,15 +349,38 @@ def download_bundle_deps(bundle_wxs, define_files=[]):
     tree = ElementTree.parse(bundle_wxs).getroot()
     ElementTree.register_namespace("", "http://schemas.microsoft.com/wix/2006/wi")
 
+    sha1s = {
+        "redist\\vc_redist.x86.v14.24.28127.4.exe": "AFA5BADCE64EE67290ADD24E0DC3D8210954AC6C",
+        "redist\\Windows6.1-KB2999226-x64.msu": "54050A5F8AE7F0C56E553F0090146C17A1D2BF8D",
+        "redist\\Windows8.1-KB2999226-x64.msu": "3ACBF3890FC9C8A6F3D2155ECF106028E5F55164",
+        "redist\\Windows6.0-KB2999226-x64.msu": "0BEFBB0B78588F7C9F17EAD1DA3ABEDA2B6F4C7F",
+        "redist\\vc_redist.x64.v14.24.28127.4.exe": "B87C38D093872D7BE7E191F01107B39C87888A5A",
+        "redist\\Windows8-RT-KB2999226-x64.msu": "B5943B2700B56F5F8DC307A9E237F23FCA5D8B70",
+    }
     for package in itertools.chain(tree.findall(".//{http://schemas.microsoft.com/wix/2006/wi}ExePackage"),
             tree.findall(".//{http://schemas.microsoft.com/wix/2006/wi}MsuPackage"),
             tree.findall(".//{http://schemas.microsoft.com/wix/2006/wi}MsiPackage")):
         url = eval_vars(package.get('DownloadUrl', ''))
         if not url:
             continue
-        filename = os.path.join(bundle_dir, eval_vars(package.get('SourceFile', '') or package.get('Name', '')))
-        download_file(url, filename)
+        base_filename = eval_vars(package.get('SourceFile', '') or package.get('Name', ''))
+        filename = os.path.join(bundle_dir, base_filename)
+        download_file(url, filename, sha1s[eval_vars(package.get('Name', ''))].lower())
         downloaded_files.append(filename)
+
+        if package.tag.endswith('ExePackage'):
+            version_map = {
+                'vcredist_2015': 'VcRedistVersion',
+                }
+            for filename_prefix, version in version_map.items():
+                if package.get('Id').startswith(filename_prefix):
+                    defines_version = list(map(int, defines.defines[version].replace('v', '').split('.')))
+                    if defines_version != list(get_version_number(filename)):
+                        raise ValueError('{}: Expected version {!r} does not match downloaded version {!r}'.format(package.get('Id'), defines_version, list(get_version_number(filename))))
+                    break
+            else:
+                raise ValueError('No entry in version_map for {}'.format(package.get('Id')))
+
     # from https://github.com/wixtoolset/wix3/blob/develop/src/ext/NetFxExtension/wixlib/NetFx4.5.wxs
     # filename = 'redist\\dotNetFx45_Full_setup.exe'
     # download_file('http://go.microsoft.com/fwlink/?LinkId=225704', filename)
