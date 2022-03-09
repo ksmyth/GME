@@ -67,7 +67,7 @@
       <PackageGroupRef Id="NetFx45Web"/>
 
       <ExePackage Id="vcredist_2015_x86.exe"
-                  Name="vc_redist.x86.$(var.VcRedistVersion).exe"
+                  Name="redist\vc_redist.x86.$(var.VcRedistVersion).exe"
                   InstallCommand="/norestart /q /chainingpackage ADMINDEPLOYMENT"
                   RepairCommand="/norestart /q /chainingpackage ADMINDEPLOYMENT"
                   UninstallCommand="/norestart /q /chainingpackage ADMINDEPLOYMENT"
@@ -84,7 +84,7 @@
       />
 
       <ExePackage Id="vcredist_2015_x64.exe"
-                  Name="vc_redist.x64.$(var.VcRedistVersion).exe"
+                  Name="redist\vc_redist.x64.$(var.VcRedistVersion).exe"
                   InstallCommand="/norestart /q /chainingpackage ADMINDEPLOYMENT"
                   RepairCommand="/norestart /q /chainingpackage ADMINDEPLOYMENT"
                   UninstallCommand="/norestart /q /chainingpackage ADMINDEPLOYMENT"
@@ -102,7 +102,7 @@
                   />
 
       <MsuPackage Id="Win61_KB2999226_x64"
-                  Name="Windows6.0-KB2999226-x64.msu"
+                  Name="redist\Windows6.0-KB2999226-x64.msu"
                   Compressed="$(var.Compressed)"
                   Permanent="yes"
                   InstallCondition="VersionNT64 AND VersionNT = v6.0"
@@ -115,7 +115,7 @@
                   />
 
       <MsuPackage Id="Win71_KB2999226_x64"
-                  Name="Windows6.1-KB2999226-x64.msu"
+                  Name="redist\Windows6.1-KB2999226-x64.msu"
                   Compressed="$(var.Compressed)"
                   Permanent="yes"
                   InstallCondition="VersionNT64 AND VersionNT = v6.1"
@@ -128,7 +128,7 @@
                   />
 
       <MsuPackage Id="Win80_KB2999226_x64"
-                  Name="Windows8-RT-KB2999226-x64.msu"
+                  Name="redist\Windows8-RT-KB2999226-x64.msu"
                   Compressed="$(var.Compressed)"
                   Permanent="yes"
                   InstallCondition="VersionNT64 AND VersionNT = v6.2"
@@ -141,7 +141,7 @@
                   />
 
       <MsuPackage Id="Win81_KB2999226_x64"
-                  Name="Windows8.1-KB2999226-x64.msu"
+                  Name="redist\Windows8.1-KB2999226-x64.msu"
                   Compressed="$(var.Compressed)"
                   Permanent="yes"
                   InstallCondition="VersionNT64 AND VersionNT &gt;= v6.3 AND ADVAPIVERSION &lt; v6.3.10000.0"
@@ -154,7 +154,8 @@
                   />
 
       <MsiPackage Id="GME"
-                  Name="GME_x64.msi"
+                  SourceFile="GME_x64.msi"
+                  Name="GME_x64_$(var.VERSIONSTR).msi"
                   Compressed="yes"
                   Visible="no"
                   ForcePerMachine="yes"
