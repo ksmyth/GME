@@ -26,8 +26,6 @@
  * with Purdue University and AHPCRC, University of Minnesota
  * 1989-1998
  */
-// See http://support.microsoft.com/kb/148652
-//#include "forcelib.h"
 #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>

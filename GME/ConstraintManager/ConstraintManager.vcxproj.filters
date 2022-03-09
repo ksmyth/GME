@@ -200,9 +200,6 @@
     <ClInclude Include="ExpressionChecker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Forcelib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GMEConstraintBrowserDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -370,7 +370,6 @@ dlg -C2 -i -CC -cl OCLLexer OCLParser.dlg
   <ItemGroup>
     <ClInclude Include="ConstraintMgr.h" />
     <ClInclude Include="ExpressionChecker.h" />
-    <ClInclude Include="Forcelib.h" />
     <ClInclude Include="GMEConstraintBrowserDialog.h" />
     <ClInclude Include="GMEConstraintEx.h" />
     <ClInclude Include="GMEConstraintPropertiesDialog.h" />
