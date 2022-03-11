@@ -76,6 +76,10 @@ rem where svn.exe || exit /b !ERRORLEVEL!
 rem svn ls https://svn.isis.vanderbilt.edu/GMESRC || exit /b !ERRORLEVEL!
 svn cp -m "Tag Release %VERSION%" https://svn.isis.vanderbilt.edu/GMESRC/trunk https://svn.isis.vanderbilt.edu/GMESRC/tags/Release_%VERSION%
 
+cd Doc
+"%PYTHON%" -m markdown index.md > index.html
+cd ..
+
 cd redist
 ssh repo@repo.isis.vanderbilt.edu mkdir GME/%VERSION%/ && \
 scp ../Doc/README.txt GME-%VERSION%.exe GME-%VERSION%.msi GME_x64-%VERSION%.msi GME-%VERSION%_src.7z repo@repo.isis.vanderbilt.edu:GME/%VERSION%/ && \
@@ -84,5 +88,5 @@ scp ../Doc/index.html repo@repo.isis.vanderbilt.edu:GME/ && \
 ssh repo@repo.isis.vanderbilt.edu chmod -R a+r GME/%VERSION%/
 
 pushd %GME_ROOT%\Doc
-%userprofile%\Downloads\markdown\scripts\python %userprofile%\Downloads\markdown\upload.py
-
+rem scp -r Tutorial/ repo@repo.isis.vanderbilt.edu/GME/
+rem TODO user's manual PDF to http://repo.isis.vanderbilt.edu/GME/GME%20Manual%20and%20User%20Guide/GME%20Manual%20and%20User%20Guide.pdf

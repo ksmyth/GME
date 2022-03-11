@@ -6,7 +6,7 @@
 0. Important Upgrade Information
 ************************************************
 
-The GME_x64.msi installers include both 64 bit and
+The GME-x.y.z.exe installer includes both 64 bit and
 32 bit GME. 64 bit GME does not support Multi-user projects.
 
 .mga files saved with GME r11.12.2 and later cannot
@@ -25,12 +25,13 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
-Release Notes
+Release Notes of Release 22.3.14
 ----------------------------------
   - Binary compatibility with 11.12.2
   - Render connection customization for high-dpi
   - Add right-click menu to model editor tabs
   - Fix dragging to resize FCO under high-dpi
+  - Upgrade XmlBackend to SVN 1.14.1
 
 Release Notes of Release 21.10.5
 ----------------------------------
