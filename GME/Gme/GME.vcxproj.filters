@@ -225,21 +225,6 @@
     <ClCompile Include="CSGUIInterop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SVNClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SVNDialogCommit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SVNDialogLogin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SVNDialogPlaintext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SVNDialogSSLServerTrust.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GMEViewOverlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

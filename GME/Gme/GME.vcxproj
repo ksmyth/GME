@@ -369,13 +369,6 @@ xcopy /Y/D/F ..\Lib\CrashRpt\bin\x64\crashrpt_lang.ini "$(OutDir)"
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="SVNClient.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="SVNDialogCommit.cpp" />
-    <ClCompile Include="SVNDialogLogin.cpp" />
-    <ClCompile Include="SVNDialogPlaintext.cpp" />
-    <ClCompile Include="SVNDialogSSLServerTrust.cpp" />
     <ClCompile Include="SyncAspListCtrl.cpp" />
     <ClCompile Include="SyncObjsListCtrl.cpp" />
   </ItemGroup>
