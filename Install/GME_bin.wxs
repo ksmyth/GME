@@ -793,6 +793,10 @@
         <File Id="libapr_tsvn32.dll" Name="libapr_tsvn32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libapr_tsvn32.dll" />
       </Component>
 
+      <Component Id="libsasl32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
+        <File Id="libsasl32.dll" Name="libsasl32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libsasl32.dll" />
+      </Component>
+
       <Component Id="libaprutil_tsvn32.dll" Directory='INSTALLDIR_BIN$(sys.BUILDARCH)'>
         <File Id="libaprutil_tsvn32.dll" Name="libaprutil_tsvn32.dll" KeyPath="yes" Source="..\GME\lib\subv_release\libaprutil_tsvn32.dll" />
       </Component>
