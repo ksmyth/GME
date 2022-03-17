@@ -25,7 +25,7 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
-Release Notes of Release 22.3.14
+Release Notes of Release 22.3.17
 ----------------------------------
   - Binary compatibility with 11.12.2
   - Render connection customization for high-dpi
