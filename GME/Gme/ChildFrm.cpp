@@ -199,7 +199,9 @@ BOOL CChildFrame::PreTranslateMessage(MSG* pMsg)
 
 	auto& GetChildFrame = [&]() {
 		CMFCTabCtrl* tabCtrl = GetRelatedTabGroup();
-		CPoint point(xPos, yPos);
+		CPoint point = { xPos, yPos };
+		::ClientToScreen(pMsg->hwnd, &point);
+		::ScreenToClient(tabCtrl->GetSafeHwnd(), &point);
 		if (tabCtrl->IsPtInTabArea(point)) {
 			int i = tabCtrl->GetTabFromPoint(point);
 			if (i >= 0) {
