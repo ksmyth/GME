@@ -82,8 +82,8 @@ public:
 
 		pen.Attach(ExtCreatePen(PS_GEOMETRIC | ((m_nStyle & dottedLine) ? PS_DOT : PS_SOLID), width,
 			&brush, 0, nullptr));
-		pOldPen = (CPen*)pDC->SelectObject(pen);
-		pOldBrush = (CBrush*)pDC->SelectStockObject(NULL_BRUSH);
+		pOldPen = static_cast<CPen*>(pDC->SelectObject(&pen));
+		pOldBrush = static_cast<CBrush*>(pDC->SelectStockObject(NULL_BRUSH));
 		nOldROP = pDC->SetROP2(R2_COPYPEN);
 		rect.InflateRect(+1, +1);   // borders are one pixel outside
 		pDC->Rectangle(rect.left, rect.top, rect.right, rect.bottom);
@@ -1376,7 +1376,7 @@ void CGMEView::PrintHeaderRect(CDC* pDC, CRect &rectDraw)
 	// TODO: Error checking
 	pDC->StretchBlt(0, txty-LOGOSIZE/2,LOGOSIZE/2,LOGOSIZE/2,&logoDC,0,0,LOGOSIZE, LOGOSIZE, SRCCOPY);
 	if (bmp)
-		bmp = logoDC.SelectObject((CBitmap*)bmp);
+		logoDC.SelectObject(bmp);
 	logo.DeleteObject();
 
 

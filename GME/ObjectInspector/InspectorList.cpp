@@ -216,7 +216,7 @@ void CInspectorList::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		// Drawing edges - But we have to increase the rect
 		if(!rectLeft.IsRectEmpty())
 		{
-			dc.SelectObject(PenInactiveBorder);
+			dc.SelectObject(&PenInactiveBorder);
 			rectLeft.InflateRect(2,1,0,0);
 			dc.DrawEdge(rectLeft,EDGE_SUNKEN,BF_BOTTOMRIGHT);
 
