@@ -18,6 +18,8 @@ dir "%GME_ROOT%" || exit /b !ERRORLEVEL!
 if not exist "%SYMSTORE%" set SYMSTORE=C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\symstore.exe
 dir "%SYMSTORE%" || exit /b !ERRORLEVEL!
 
+dir "%JAVA_HOME%" || exit /b !ERRORLEVEL!
+
 if exist redist echo Move redist out of the way
 if exist redist exit /b 1
 

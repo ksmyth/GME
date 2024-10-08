@@ -24,19 +24,19 @@ Update version number: Doc/index.md
 pushd Doc
 %USERPROFILE%\Downloads\markdown\Scripts\python -m markdown index.md > index.html
 popd
-svn ci -m "GME release 17.9.28"
+svn ci -m "GME release 24.10.9"
 
 #wait for all gme builds on http://build.isis.vanderbilt.edu/
 
 # Downloading the build artifacts, i.e. two installers and the README file
 # bash:
-mkdir GME-17.9.28
-cd GME-17.9.28
+mkdir GME-24.10.9
+cd GME-24.10.9
 export PATH=$PATH:/c/cygwin/bin:"/c/Program Files/7-Zip/:/cygdrive/c/Program Files/7-Zip/"
  build=https://user:password@build.isis.vanderbilt.edu
  build=http://build.isis.vanderbilt.edu
-curl -f -o GME_x64-17.9.28.msi $build/job/GME_x64_msi/label=build-slave6/lastSuccessfulBuild/artifact/trunk/Install/GME_x64.msi && \
-curl -f -o GME-17.9.28.msi $build/job/GME/label=build-slave9/lastSuccessfulBuild/artifact/trunk/Install/GME.msi && \
+curl -f -o GME_x64-24.10.9.msi $build/job/GME_x64_msi/label=build-slave6/lastSuccessfulBuild/artifact/trunk/Install/GME_x64.msi && \
+curl -f -o GME-24.10.9.msi $build/job/GME/label=build-slave9/lastSuccessfulBuild/artifact/trunk/Install/GME.msi && \
 curl -f -o README.txt $build/job/GME/label=build-slave9/ws/trunk/Doc/README.txt
 
 # Saving all symbols
@@ -48,25 +48,25 @@ for file in $build/job/GME_x64/lastSuccessfulBuild/label=build-slave6/artifact/t
 
 #!/bin/bash
 export PATH="$PATH":'C:\Program Files (x86)\Subversion\bin'
-svn cp -m 'Tag Release 17.9.28' https://svn.isis.vanderbilt.edu/GMESRC/trunk https://svn.isis.vanderbilt.edu/GMESRC/tags/Release_17.9.28
-svn export https://svn.isis.vanderbilt.edu/GMESRC/tags/Release_17.9.28 GME-17.9.28_src && \
-7z.exe a GME-17.9.28_src.zip GME-17.9.28_src/
+svn cp -m 'Tag Release 24.10.9' https://svn.isis.vanderbilt.edu/GMESRC/trunk https://svn.isis.vanderbilt.edu/GMESRC/tags/Release_24.10.9
+svn export https://svn.isis.vanderbilt.edu/GMESRC/tags/Release_24.10.9 GME-24.10.9_src && \
+7z.exe a GME-24.10.9_src.zip GME-24.10.9_src/
 
 #!/bin/bash
-ssh repo@repo.isis.vanderbilt.edu mkdir GME/17.9.28/ && \
-scp README.txt GME-17.9.28.msi GME_x64-17.9.28.msi GME-17.9.28_src.zip repo@repo.isis.vanderbilt.edu:GME/17.9.28/ && \
-ssh repo@repo.isis.vanderbilt.edu chmod -R a+r GME/17.9.28/
+ssh repo@repo.isis.vanderbilt.edu mkdir GME/24.10.9/ && \
+scp README.txt GME-24.10.9.msi GME_x64-24.10.9.msi GME-24.10.9_src.zip repo@repo.isis.vanderbilt.edu:GME/24.10.9/ && \
+ssh repo@repo.isis.vanderbilt.edu chmod -R a+r GME/24.10.9/
 
 
 # Update online documentation:
 #!/bin/bash
-cd GME-17.9.28_src/Doc
+cd GME-24.10.9_src/Doc
 # need a replacement for the old method: 
 #ssh zsolt@kms1.isis.vanderbilt.edu sudo mount -t davfs -o uid=1006 https://forge.isis.vanderbilt.edu/gme/dav/ /home/build/gmedav
 # rsync --chmod=ugo+xr,u+w,o-w --perms --delete --delete-excluded -avP . --include=/Tutorial** --include google3a6cca9137b58176.html --include=index.html --include=markdown.css --include='*/' --include='**GME Manual and User Guide.pdf' --exclude=*  build@kms1.isis.vanderbilt.edu:/home/build/gmedav/www/
 %userprofile%\Downloads\markdown\scripts\python %userprofile%\Downloads\markdown\upload.py
 
-# Make sure links are working from http://repo.isis.vanderbilt.edu/GME/old/17.9.28/
+# Make sure links are working from http://repo.isis.vanderbilt.edu/GME/old/24.10.9/
 
 
 ## OPTIONAL STEPS
@@ -84,23 +84,23 @@ set PATH=%PATH%;C:\Program Files\7-Zip
 7z x -y -opdbs/x64 pdbs_x64.7z || exit /b !ERRORLEVEL!
 mkdir pdbs_organized
 "c:\Program Files (x86)\Debugging Tools for Windows (x86)\symstore.exe" add /r /f pdbs /s pdbs_organized /t GME || exit /b !ERRORLEVEL!
-set _NT_SYMBOL_PATH=srv*%CD%\GME-17.9.28_symbols*%CD%\pdbs_organized
-mkdir c:\GME_17.9.28_symbols
+set _NT_SYMBOL_PATH=srv*%CD%\GME-24.10.9_symbols*%CD%\pdbs_organized
+mkdir c:\GME_24.10.9_symbols
 "c:\Program Files (x86)\Debugging Tools for Windows (x86)\symchk.exe" /r "C:\Program Files (x86)\GME"
 "c:\Program Files (x86)\Debugging Tools for Windows (x86)\symchk.exe" /r "C:\Program Files\GME"
-"c:\Program Files\7-Zip\7z.exe" a -xr!.svn %userprofile%\GME-17.9.28_symbols.7z GME-17.9.28_symbols
-copy %userprofile%\GME-17.9.28_symbols.7z \\vboxsrv\xfer
+"c:\Program Files\7-Zip\7z.exe" a -xr!.svn %userprofile%\GME-24.10.9_symbols.7z GME-24.10.9_symbols
+copy %userprofile%\GME-24.10.9_symbols.7z \\vboxsrv\xfer
 
-scp GME-17.9.28_symbols.7z repo@repo.isis.vanderbilt.edu:GME/17.9.28/ && \
-ssh repo@repo.isis.vanderbilt.edu chmod -R a+r GME/17.9.28/
+scp GME-24.10.9_symbols.7z repo@repo.isis.vanderbilt.edu:GME/24.10.9/ && \
+ssh repo@repo.isis.vanderbilt.edu chmod -R a+r GME/24.10.9/
 
 
 Method 2: extract files from msi
 SetLocal EnableDelayedExpansion
 rem cd %userprofile%\Downloads
-set MSI=GME_x64-17.9.28.msi
-set BASENAME=GME-17.9.28
-set REPO_DIR=GME/17.9.28/
+set MSI=GME_x64-24.10.9.msi
+set BASENAME=GME-24.10.9
+set REPO_DIR=GME/24.10.9/
 rem curl -sS -O http://repo.isis.vanderbilt.edu/%REPO_DIR%%MSI || exit /b !ERRORLEVEL!
 set PATH=%PATH%;C:\Program Files\7-Zip
 7z x -y -opdbs/x86 pdbs_x86.7z || exit /b !ERRORLEVEL!

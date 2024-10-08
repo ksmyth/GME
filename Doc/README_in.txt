@@ -25,6 +25,12 @@ You must uninstall GME versions prior to version
 1. Release Notes
 ************************************************
 
+Release Notes of Release 24.10.9
+----------------------------------
+  - Binary compatibility with 11.12.2
+  - Fix crash in model editor (more likely under x64 GME)
+  - Model Editor: fix right-click on tab menu showing up when clicking on other frames
+
 Release Notes of Release 22.3.17
 ----------------------------------
   - Binary compatibility with 11.12.2
